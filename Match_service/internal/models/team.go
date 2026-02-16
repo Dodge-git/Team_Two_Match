@@ -11,5 +11,8 @@ type Team struct {
 	ShortName string `json:"short_name" gorm:"not null;size:16"`
 	City      string `json:"city" gorm:"not null;size:100"`
 
-	Matches []Match
+	Players []Player `json:"-"`
+
+	HomeMatches []Match `json:"-"`
+	AwayMatches []Match `json:"-"`
 }
