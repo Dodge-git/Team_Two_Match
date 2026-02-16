@@ -4,7 +4,7 @@ import "gorm.io/gorm"
 
 type Player struct {
 	gorm.Model
-	TeamID uint `json:"team_id" gorm:"not null"`
+	TeamID uint `json:"team_id" gorm:"not null;uniqueIndex:idx_team_number"`
 	Team   Team `json:"-"`
 
 	Name     string `json:"name" gorm:"not null;size:100"`
