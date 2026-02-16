@@ -13,6 +13,6 @@ type Team struct {
 
 	Players []Player `json:"-"`
 
-	HomeMatches []Match `json:"-"`
-	AwayMatches []Match `json:"-"`
+	HomeMatches []Match `json:"-" gorm:"foreignKey:HomeTeamID"`
+	AwayMatches []Match `json:"-" gorm:"foreignKey:AwayTeamID"`
 }
