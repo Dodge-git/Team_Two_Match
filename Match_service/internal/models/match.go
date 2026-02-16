@@ -35,6 +35,4 @@ type Match struct {
 	Venue          string `json:"venue" gorm:"size:255"`
 	TournamentName string `json:"tournament_name" gorm:"size:255"`
 
-	HomeMatches []Match `json:"-" gorm:"foreignKey:HomeTeamID"`
-	AwayMatches []Match `json:"-" gorm:"foreignKey:AwayTeamID"`
 }
