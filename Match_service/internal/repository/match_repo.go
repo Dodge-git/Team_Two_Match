@@ -11,7 +11,7 @@ import (
 type MatchRepository interface {
 	Create(match *models.Match) error
 	GetByID(id uint) (*models.Match, error)
-	Update(id uint, match *models.Match) error
+	Update(match *models.Match) error
 	Delete(id uint) error
 }
 
@@ -46,7 +46,7 @@ func (r *matchRepository) GetByID(id uint) (*models.Match, error) {
 	return &match, nil
 }
 
-func (r *matchRepository) Update(id uint, match *models.Match) error {
+func (r *matchRepository) Update(match *models.Match) error {
 	if match == nil {
 		return errors.New("match is nil")
 	}

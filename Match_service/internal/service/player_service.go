@@ -53,16 +53,16 @@ func (s *playerService) Update(playerID uint, req dto.UpdatePlayerRequest) (*mod
 		}
 		return nil, err
 	}
-	name := strings.TrimSpace(*req.Name)
-	position := strings.TrimSpace(*req.Position)
 
 	if req.Name != nil {
+		name := strings.TrimSpace(*req.Name)
 		player.Name = name
 	}
 	if req.Number != nil {
 		player.Number = *req.Number
 	}
 	if req.Position != nil {
+		position := strings.TrimSpace(*req.Position)
 		player.Position = position
 	}
 

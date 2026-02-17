@@ -24,8 +24,9 @@ func NewTeamRepository(db *gorm.DB) TeamRepository {
 
 func (r *teamRepository) Create(team *models.Team) error {
 	if team == nil {
-		return nil
+		return errors.New("team is nil")
 	}
+
 	if err := r.db.Create(team).Error; err != nil {
 		return err
 	}
