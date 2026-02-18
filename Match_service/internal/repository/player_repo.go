@@ -13,21 +13,22 @@ type PlayerRepository interface {
 	GetByID(playerID uint) (*models.Player, error)
 	Delete(playerID uint) error
 	Update(player *models.Player) error
+	List(teamID uint) ([]models.Player, error)
 }
 
-type gormPlayerRepository struct {
+type playerRepository struct {
 	db *gorm.DB
 }
 
 func NewPlayerRepository(db *gorm.DB) PlayerRepository {
-	return &gormPlayerRepository{db: db}
+	return &playerRepository{db: db}
 }
 
-func (r *gormPlayerRepository) Create(player *models.Player) error {
+func (r *playerRepository) Create(player *models.Player) error {
 	return r.db.Create(player).Error
 }
 
-func (r *gormPlayerRepository) GetByID(playerID uint) (*models.Player, error) {
+func (r *playerRepository) GetByID(playerID uint) (*models.Player, error) {
 	var player models.Player
 	if err := r.db.First(&player, playerID).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -38,10 +39,19 @@ func (r *gormPlayerRepository) GetByID(playerID uint) (*models.Player, error) {
 	return &player, nil
 }
 
-func (r *gormPlayerRepository) Delete(playerID uint) error {
+func (r *playerRepository) Delete(playerID uint) error {
 	return r.db.Delete(&models.Player{}, playerID).Error
 }
 
-func (r *gormPlayerRepository) Update(player *models.Player) error {
+func (r *playerRepository) Update(player *models.Player) error {
 	return r.db.Save(player).Error
+}
+
+func (r *playerRepository) List(teamID uint) ([]models.Player, error) {
+	var players []models.Player
+
+	if err := r.db.Where("teamID = ?", teamID).Find(&players).Error; err != nil {
+		return nil, err
+	}
+	return players, nil
 }

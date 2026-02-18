@@ -14,6 +14,7 @@ type PlayerService interface {
 	Update(playerID uint, req dto.UpdatePlayerRequest) (*models.Player, error)
 	Delete(playerID uint) error
 	GetByID(playerID uint) (*models.Player, error)
+	List(teamID uint) ([]models.Player, error)
 }
 
 type playerService struct {
@@ -103,4 +104,16 @@ func (s *playerService) GetByID(id uint) (*models.Player, error) {
 		return nil, err
 	}
 	return player, nil
+}
+
+func (s *playerService) List(teamID uint) ([]models.Player, error) {
+	if teamID == 0 {
+		return nil, errs.ErrInvalidTeamID
+	}
+
+	players, err := s.playerRepo.List(teamID)
+	if err != nil {
+		return nil, err
+	}
+	return players, nil
 }

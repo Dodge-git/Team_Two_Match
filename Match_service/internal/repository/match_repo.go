@@ -13,6 +13,9 @@ type MatchRepository interface {
 	GetByID(id uint) (*models.Match, error)
 	Update(match *models.Match) error
 	Delete(id uint) error
+	List(models.MatchFilter) ([]models.Match, int64, error)
+	GetActive() ([]models.Match, error)
+	IncrementScore(matchID uint, teamID uint) error
 }
 
 type matchRepository struct {
@@ -55,4 +58,77 @@ func (r *matchRepository) Update(match *models.Match) error {
 
 func (r *matchRepository) Delete(id uint) error {
 	return r.db.Delete(&models.Match{}, id).Error
+}
+
+func (r *matchRepository) List(filter models.MatchFilter) ([]models.Match, int64, error) {
+	var matches []models.Match
+	var total int64
+	query := r.db.Model(&models.Match{})
+
+	if filter.SportID != nil {
+		query = query.Where("sport_id = ?", *filter.SportID)
+	}
+
+	if filter.DateFrom != nil {
+		query = query.Where("scheduled_at >= ?", *filter.DateFrom)
+	}
+
+	if filter.DateFrom != nil {
+		query = query.Where("scheduled_at <= ?", *filter.DateTo)
+	}
+
+	if filter.Status != nil {
+		query = query.Where("status = ?", *filter.Status)
+
+	}
+
+	query.Count(&total)
+
+	offset := (filter.Page - 1) * filter.PageSize
+
+	if err := query.
+		Limit(filter.PageSize).
+		Offset(offset).
+		Order("scheduled_at ASC").
+		Find(&matches).Error; err != nil {
+
+		return nil, 0, err
+	}
+	return matches, total, nil
+}
+
+func (r *matchRepository) GetActive() ([]models.Match, error) {
+	var matches []models.Match
+
+	if err := r.db.Where("status = ?", "live").Find(&matches).Error; err != nil {
+		return nil, err
+	}
+	return matches, nil
+}
+
+func (r *matchRepository) IncrementScore(matchID uint, teamID uint) error {
+	result := r.db.Model(&models.Match{}).
+		Where("id = ? AND  status = ? AND home_team_id = ?", matchID, models.MatchStatusLive, teamID).
+		UpdateColumn("home_score = ?", gorm.Expr("home_score + 1"))
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	if result.RowsAffected > 0 {
+		return nil
+	}
+
+	result = r.db.Model(&models.Match{}).
+		Where("id = ? AND  status = ? AND home_team_id = ?", matchID, models.MatchStatusLive, teamID).
+		UpdateColumn("away_score = ?", gorm.Expr("away_score + 1"))
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	if result.RowsAffected > 0 {
+		return nil
+	}
+	return errs.ErrInvalidGoalEvent
 }
