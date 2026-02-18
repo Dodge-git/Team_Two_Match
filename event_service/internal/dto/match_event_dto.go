@@ -45,6 +45,21 @@ type MatchEventResponse struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+type TimelineEventDTO struct {
+	ID        uint64           `json:"id"`
+	Type      TimelineItemType `json:"type"`
+	EventType string           `json:"event_type"`
+
+	Minute int `json:"minute"`
+
+	TeamID   *uint64 `json:"team_id,omitempty"`
+	PlayerID *uint64 `json:"player_id,omitempty"`
+
+	Description string `json:"description,omitempty"`
+
+	Reactions map[string]int `json:"reactions"`
+}
+
 type MatchEventCreatedMessage struct {
 	MatchID     uint64 `json:"match_id"`
 	EventType   string `json:"event_type"`
