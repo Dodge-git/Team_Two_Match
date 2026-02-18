@@ -27,21 +27,21 @@ func GenerateToken(userID uint) (string, error) {
 
 func ParseToken(tokenStr string) (uint, string, error) {
 	jwtSecret := os.Getenv("JWT_SECRET")
-	token, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) { return jwtSecret, nil })
+	token, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) { return []byte(jwtSecret), nil })
 	if err != nil || token.Valid == false {
 		return 0, "", errors.New("Token Not Valid")
 	}
-	Claims, ok := token.Claims.(jwt.MapClaims)
+	claims, ok := token.Claims.(jwt.MapClaims)
 	if ok != true {
 		return 0, "", errors.New("Claims Not Valid")
 	}
-	UserID, ok := Claims["user_id"].(float64)
+	userID, ok := claims["user_id"].(float64)
 	if ok != true {
 		return 0, "", errors.New("UserID Not Valid")
 	}
-	Role, ok := Claims["role"].(string)
+	role, ok := claims["role"].(string)
 	if ok != true {
 		return 0, "", errors.New("Role Not Valid")
 	}
-	return uint(UserID), Role, nil
+	return uint(userID), role, nil
 }
