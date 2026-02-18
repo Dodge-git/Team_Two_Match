@@ -12,6 +12,7 @@ type TeamRepository interface {
 	Create(team *models.Team) error
 	GetByID(id uint) (*models.Team, error)
 	Delete(id uint) error
+	List(sportID uint) ([]models.Team, error)
 }
 
 type teamRepository struct {
@@ -51,4 +52,13 @@ func (r *teamRepository) Delete(id uint) error {
 		return err
 	}
 	return nil
+}
+
+func (r *teamRepository) List(sportID uint) ([]models.Team, error) {
+	var teams []models.Team
+
+	if err := r.db.Where("sport_id = ?", sportID).Find(&teams).Error; err != nil {
+		return nil, err
+	}
+	return teams, nil
 }
