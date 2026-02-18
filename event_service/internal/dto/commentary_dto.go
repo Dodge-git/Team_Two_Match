@@ -28,15 +28,3 @@ type CommentaryResponse struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
-
-type TimelineCommentaryDTO struct {
-	ID   uint64           `json:"id"`
-	Type TimelineItemType `json:"type"`
-
-	Minute int `json:"minute"`
-
-	Text     string `json:"text"`
-	IsPinned bool   `json:"is_pinned"`
-
-	Reactions map[string]int `json:"reactions"`
-}

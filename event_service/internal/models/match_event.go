@@ -27,8 +27,8 @@ type MatchEvent struct {
 	MatchID   uint64    `json:"match_id" gorm:"not null;index:idx_match_time_minute,priority:1"`
 	EventType EventType `gorm:"type:varchar(30);not null;index"`
 
-	Minute int `gorm:"not null;index:idx_match_time_minute,priority:2"`
-	Period int `gorm:"not null"`
+	Minute int  `gorm:"not null;index:idx_match_time_minute,priority:2"`
+	Period *int `gorm:"not null"`
 
 	TeamID   *uint64 `gorm:"index"`
 	PlayerID *uint64 `gorm:"index"`
