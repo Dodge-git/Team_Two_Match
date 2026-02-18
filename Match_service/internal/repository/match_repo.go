@@ -73,7 +73,7 @@ func (r *matchRepository) List(filter models.MatchFilter) ([]models.Match, int64
 		query = query.Where("scheduled_at >= ?", *filter.DateFrom)
 	}
 
-	if filter.DateFrom != nil {
+	if filter.DateTo != nil {
 		query = query.Where("scheduled_at <= ?", *filter.DateTo)
 	}
 
@@ -109,7 +109,7 @@ func (r *matchRepository) GetActive() ([]models.Match, error) {
 func (r *matchRepository) IncrementScore(matchID uint, teamID uint) error {
 	result := r.db.Model(&models.Match{}).
 		Where("id = ? AND  status = ? AND home_team_id = ?", matchID, models.MatchStatusLive, teamID).
-		UpdateColumn("home_score = ?", gorm.Expr("home_score + 1"))
+		UpdateColumn("home_score", gorm.Expr("home_score + 1"))
 
 	if result.Error != nil {
 		return result.Error
@@ -120,8 +120,8 @@ func (r *matchRepository) IncrementScore(matchID uint, teamID uint) error {
 	}
 
 	result = r.db.Model(&models.Match{}).
-		Where("id = ? AND  status = ? AND home_team_id = ?", matchID, models.MatchStatusLive, teamID).
-		UpdateColumn("away_score = ?", gorm.Expr("away_score + 1"))
+		Where("id = ? AND  status = ? AND away_team_id = ?", matchID, models.MatchStatusLive, teamID).
+		UpdateColumn("away_score", gorm.Expr("away_score + 1"))
 
 	if result.Error != nil {
 		return result.Error

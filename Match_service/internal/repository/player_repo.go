@@ -50,7 +50,7 @@ func (r *playerRepository) Update(player *models.Player) error {
 func (r *playerRepository) List(teamID uint) ([]models.Player, error) {
 	var players []models.Player
 
-	if err := r.db.Where("teamID = ?", teamID).Find(&players).Error; err != nil {
+	if err := r.db.Where("team_id = ?", teamID).Find(&players).Error; err != nil {
 		return nil, err
 	}
 	return players, nil

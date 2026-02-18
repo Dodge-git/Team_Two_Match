@@ -27,7 +27,7 @@ type matchService struct {
 	teamRepo  repository.TeamRepository
 }
 
-func NewMatchRepository(matchRepo repository.MatchRepository, sportRepo repository.SportRepository, teamRepo repository.TeamRepository) MatchService {
+func NewMatchService(matchRepo repository.MatchRepository, sportRepo repository.SportRepository, teamRepo repository.TeamRepository) MatchService {
 	return &matchService{matchRepo: matchRepo, sportRepo: sportRepo, teamRepo: teamRepo}
 }
 
@@ -115,7 +115,6 @@ func (s *matchService) DeleteMatch(id uint) error {
 }
 
 func (s *matchService) ListMatches(filter models.MatchFilter) (*dto.MatchListResponse, error) {
-	var matches []models.Match
 
 	if filter.Page < 1 {
 		filter.Page = 1
@@ -138,7 +137,7 @@ func (s *matchService) ListMatches(filter models.MatchFilter) (*dto.MatchListRes
 		}
 	}
 	if filter.Status != nil {
-		status := models.MatchStatus(*filter.Status)
+		status := *filter.Status
 		if status != models.MatchStatusScheduled &&
 			status != models.MatchStatusLive &&
 			status != models.MatchStatusFinished &&
@@ -238,7 +237,7 @@ func (s *matchService) CancelMatch(id uint) error {
 		return errors.New("match cannot be canceled")
 	}
 
-	match.Status = models.MatchStatusFinished
+	match.Status = models.MatchStatusCancelled
 
 	return s.matchRepo.Update(match)
 }

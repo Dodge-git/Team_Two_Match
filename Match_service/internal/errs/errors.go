@@ -17,5 +17,4 @@ var (
 	ErrTeamsNotInSport = errors.New("one or both teams do not belong to the specified sport")
 
 	ErrInvalidGoalEvent = errors.New("invalid goal event: team is not part of the match or match is not live")
-}
 )
