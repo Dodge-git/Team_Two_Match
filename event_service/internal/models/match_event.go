@@ -28,7 +28,7 @@ type MatchEvent struct {
 	EventType EventType `gorm:"type:varchar(30);not null;index"`
 
 	Minute int `gorm:"not null;index:idx_match_time_minute,priority:2"`
-	Period int `gorm:"not null"`
+	Period *int
 
 	TeamID   *uint64 `gorm:"index"`
 	PlayerID *uint64 `gorm:"index"`

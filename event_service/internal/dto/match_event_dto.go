@@ -73,3 +73,35 @@ type MatchGoalMessage struct {
 	PlayerID *uint64 `json:"player_id,omitempty"`
 	Minute   int     `json:"minute"`
 }
+
+type MatchEventListResponse struct {
+	Items      []MatchEventResponse `json:"items"`
+	Total      int64                `json:"total"`
+	Page       int                  `json:"page"`
+	PageSize   int                  `json:"page_size"`
+	TotalPages int                  `json:"total_pages"`
+}
+
+type TimelineResponse struct {
+	Items      []TimelineItemDTO `json:"items"`
+	Total      int64             `json:"total"`
+	Page       int               `json:"page"`
+	PageSize   int               `json:"page_size"`
+	TotalPages int               `json:"total_pages"`
+}
+
+type TimelineItemDTO struct {
+	ID   uint64           `json:"id"`
+	Type TimelineItemType `json:"type"`
+
+	Minute int `json:"minute"`
+
+	EventType string  `json:"event_type,omitempty"`
+	TeamID    *uint64 `json:"team_id,omitempty"`
+	PlayerID  *uint64 `json:"player_id,omitempty"`
+
+	Text     string `json:"text,omitempty"`
+	IsPinned bool   `json:"is_pinned,omitempty"`
+
+	Reactions map[string]int `json:"reactions,omitempty"`
+}

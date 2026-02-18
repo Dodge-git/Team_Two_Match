@@ -48,7 +48,6 @@ func (r *gormMatchEventRepository) GetByMatchID(matchID uint64, limit, offset in
 		Find(&events).Error
 
 	return events, err
-
 }
 
 func (r *gormMatchEventRepository) CountByMatchID(matchID uint64) (int64, error) {
