@@ -165,6 +165,10 @@ func (s *matchService) ListMatches(filter models.MatchFilter) (*dto.MatchListRes
 			AwayTeamID:     match.AwayTeamID,
 			Status:         match.Status,
 			ScheduledAt:    match.ScheduledAt,
+			FinishedAt:     match.FinishedAt,
+			StartedAt:      match.StartedAt,
+			HomeScore:      match.HomeScore,
+			AwayScore:      match.AwayScore,
 			Venue:          match.Venue,
 			TournamentName: match.TournamentName,
 		})

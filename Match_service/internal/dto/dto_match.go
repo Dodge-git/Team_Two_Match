@@ -34,6 +34,10 @@ type MatchResponse struct {
 	AwayTeamID     uint               `json:"away_team_id"`
 	Status         models.MatchStatus `json:"status"`
 	ScheduledAt    time.Time          `json:"scheduled_at"`
+	StartedAt      *time.Time         `json:"started_at"`
+	FinishedAt     *time.Time         `json:"finished_at"`
+	HomeScore      int                `json:"home_score"`
+	AwayScore      int                `json:"away_score"`
 	Venue          string             `json:"venue"`
 	TournamentName string             `json:"tournament_name"`
 }
