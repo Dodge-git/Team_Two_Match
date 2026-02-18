@@ -25,7 +25,7 @@ type MatchEventService interface {
 	GetMatchTimeline(ctx context.Context, matchID uint64, page int, pageSize int) (*dto.TimelineResponse, error)
 }
 
-type KafkaProduser interface {
+type KafkaProducer interface {
 	PublishMatchEventCreated(msg dto.MatchEventCreatedMessage) error
 	PublishMatchGoal(msg dto.MatchGoalMessage) error
 }
@@ -34,7 +34,7 @@ type matchEventService struct {
 	matchEventRepo repository.MatchEventRepository
 	commentaryRepo repository.CommentaryRepository
 	reactionRepo   repository.ReactionRepository
-	produser       KafkaProduser
+	producer       KafkaProducer
 	matchClient    match.Client
 }
 
@@ -42,26 +42,26 @@ func NewMatchEventService(
 	matchEventRepo repository.MatchEventRepository,
 	commentaryRepo repository.CommentaryRepository,
 	reactionRepo repository.ReactionRepository,
-	produser KafkaProduser,
+	producer KafkaProducer,
 	matchClient match.Client,
 ) MatchEventService {
 	return &matchEventService{
 		matchEventRepo: matchEventRepo,
 		commentaryRepo: commentaryRepo,
 		reactionRepo:   reactionRepo,
-		produser:       produser,
+		producer:       producer,
 		matchClient:    matchClient,
 	}
 }
 
 func (s *matchEventService) CreateMatchEvent(ctx context.Context, req dto.CreateMatchEventRequest) (*dto.MatchEventResponse, error) {
 
-	match, err := s.matchClient.GetMatch(ctx, req.MatchID)
+	matchResp, err := s.matchClient.GetMatch(ctx, req.MatchID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch match: %w", err)
+		return nil, fmt.Errorf("failed to fetch MatchResponse: %w", err)
 	}
 
-	if match.Status != "live" {
+	if matchResp.Status != "live" {
 		return nil, errors.New("cannot add event to non-live match")
 	}
 
@@ -94,7 +94,7 @@ func (s *matchEventService) CreateMatchEvent(ctx context.Context, req dto.Create
 		Description: event.Description,
 	}
 
-	if err := s.produser.PublishMatchEventCreated(eventMsg); err != nil {
+	if err := s.producer.PublishMatchEventCreated(eventMsg); err != nil {
 		log.Printf("failed to publish match.event.created: %v", err)
 	}
 
@@ -106,7 +106,7 @@ func (s *matchEventService) CreateMatchEvent(ctx context.Context, req dto.Create
 			Minute:   event.Minute,
 		}
 
-		if err := s.produser.PublishMatchGoal(goalMsg); err != nil {
+		if err := s.producer.PublishMatchGoal(goalMsg); err != nil {
 			log.Printf("failed to publish match goal: %v", err)
 		}
 	}

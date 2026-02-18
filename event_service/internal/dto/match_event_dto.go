@@ -88,5 +88,5 @@ type TimelineItemDTO struct {
 	Text     string `json:"text,omitempty"`
 	IsPinned bool   `json:"is_pinned,omitempty"`
 
-	Reactions map[string]int `json:"reactions"`
+	Reactions map[string]int `json:"reactions,omitempty"`
 }
