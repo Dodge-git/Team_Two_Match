@@ -82,7 +82,9 @@ func (r *matchRepository) List(filter models.MatchFilter) ([]models.Match, int64
 
 	}
 
-	query.Count(&total)
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
 
 	offset := (filter.Page - 1) * filter.PageSize
 
