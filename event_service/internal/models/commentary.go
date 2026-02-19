@@ -14,4 +14,5 @@ type Commentary struct {
 	IsPinned bool `json:"is_pinned" gorm:"default:false;index"`
 
 	CreatedAt time.Time `json:"created_at" gorm:"autoCreateTime"`
+	UpdatedAt time.Time `json:"updated_at" gorm:"autoUpdateTime"`
 }
