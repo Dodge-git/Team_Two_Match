@@ -7,13 +7,10 @@ type CreateCommentaryRequest struct {
 	Minute  int    `json:"minute" binding:"required,min=0"`
 
 	Text string `json:"text" binding:"required,min=1,max=2000"`
-
-	IsPinned bool `json:"is_pinned"`
 }
 
 type UpdateCommentaryRequest struct {
-	Text     *string `json:"text,omitempty" binding:"omitempty,min=1,max=2000"`
-	IsPinned *bool   `json:"is_pinned,omitempty"`
+	Text *string `json:"text,omitempty" binding:"omitempty,min=1,max=2000"`
 }
 
 type CommentaryResponse struct {

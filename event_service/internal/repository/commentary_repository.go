@@ -55,7 +55,6 @@ func (r *gormCommentaryRepository) GetByMatchID(matchID uint64, limit, offset in
 		Find(&commentaries).Error
 
 	return commentaries, err
-
 }
 
 func (r *gormCommentaryRepository) Update(commentary *models.Commentary) error {
@@ -71,7 +70,6 @@ func (r *gormCommentaryRepository) UnpinAllByMatchID(matchID uint64) error {
 		Model(&models.Commentary{}).
 		Where("match_id = ?", matchID).
 		Update("is_pinned", false).Error
-
 }
 
 func (r *gormCommentaryRepository) SetPinned(id uint64) error {
@@ -89,5 +87,4 @@ func (r *gormCommentaryRepository) SetPinned(id uint64) error {
 	}
 
 	return nil
-
 }
