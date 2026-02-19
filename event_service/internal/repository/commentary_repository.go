@@ -58,6 +58,10 @@ func (r *gormCommentaryRepository) GetByMatchID(matchID uint64, limit, offset in
 
 }
 
+func (r *gormCommentaryRepository) Update(commentary *models.Commentary) error {
+	return r.db.Save(commentary).Error
+}
+
 func (r *gormCommentaryRepository) DeleteByID(id uint64) error {
 	return r.db.Delete(&models.Commentary{}, id).Error
 }
@@ -84,6 +88,6 @@ func (r *gormCommentaryRepository) SetPinned(id uint64) error {
 		return gorm.ErrRecordNotFound
 	}
 
-	return result.Error
+	return nil
 
 }
