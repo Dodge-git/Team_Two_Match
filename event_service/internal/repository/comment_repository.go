@@ -39,7 +39,6 @@ func (r *gormCommentRepository) GetByID(id uint64) (*models.Comment, error) {
 }
 
 func (r *gormCommentRepository) GetByEventID(eventID uint64, limit, offset int) ([]*models.Comment, error) {
-
 	var comments []*models.Comment
 
 	err := r.db.
