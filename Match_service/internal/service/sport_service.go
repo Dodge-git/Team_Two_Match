@@ -2,6 +2,7 @@ package service
 
 import (
 	"match_service/internal/dto"
+	"match_service/internal/errs"
 	"match_service/internal/models"
 	"match_service/internal/repository"
 )
@@ -20,6 +21,10 @@ func NewSportService(sportRepo repository.SportRepository) SportService {
 }
 
 func (s *sportService) Create(req dto.CreateSportRequest) (*models.Sport, error) {
+
+	if _, ok := models.ValidSport[req.Name]; !ok {
+		return nil, errs.ErrInvalidSport
+	}
 
 	sport := models.Sport{
 		Name: req.Name,

@@ -27,6 +27,10 @@ func (s *teamService) Create(req dto.CreateTeamRequest) (*models.Team, error) {
 	if req.SportID == 0 {
 		return nil, errs.ErrInvalidSportID
 	}
+
+	if _, err := s.teamRepo.GetByID(req.SportID); err != nil {
+		return nil, err
+	}
 	name := strings.TrimSpace(req.Name)
 	if name == "" {
 		return nil, errs.ErrInvalidTeamName
