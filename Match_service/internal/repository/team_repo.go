@@ -12,7 +12,7 @@ type TeamRepository interface {
 	Create(team *models.Team) error
 	GetByID(id uint) (*models.Team, error)
 	Delete(id uint) error
-	List(sportID uint) ([]models.Team, error)
+	List(filter models.TeamFilter) ([]models.Team, int64, error)
 }
 
 type teamRepository struct {
@@ -54,11 +54,31 @@ func (r *teamRepository) Delete(id uint) error {
 	return nil
 }
 
-func (r *teamRepository) List(sportID uint) ([]models.Team, error) {
+func (r *teamRepository) List(filter models.TeamFilter) ([]models.Team, int64, error) {
 	var teams []models.Team
+	var total int64
+	query := r.db.Model(&models.Team{})
 
-	if err := r.db.Where("sport_id = ?", sportID).Find(&teams).Error; err != nil {
-		return nil, err
+	if filter.SportID != nil {
+		query = query.Where("sport_id = ?", *filter.SportID)
 	}
-	return teams, nil
+
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	if filter.Page < 1 {
+		filter.Page = 1
+	}
+
+	if filter.PageSize <= 0 {
+		filter.PageSize = 10
+	}
+
+	offset := (filter.Page - 1) * filter.PageSize
+
+	if err := query.Order("name ASC").Limit(filter.PageSize).Offset(offset).Find(&teams).Error; err != nil {
+		return nil, 0, err
+	}
+	return teams, total, nil
 }
