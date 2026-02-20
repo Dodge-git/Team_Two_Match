@@ -7,8 +7,8 @@ type Comment struct {
 
 	UserID uint64 `json:"user_id" gorm:"not null;index"`
 
-	EventID      *uint64 `json:"event_id,omitempty" gorm:"index"`
-	CommentaryID *uint64 `json:"commentary_id,omitempty" gorm:"index"`
+	EventID      *uint64 `json:"event_id,omitempty" gorm:"index;constraint:OnDelete:CASCADE;"`
+	CommentaryID *uint64 `json:"commentary_id,omitempty" gorm:"index;constraint:OnDelete:CASCADE;"`
 
 	Text string `json:"text" gorm:"type:text;not null"`
 
