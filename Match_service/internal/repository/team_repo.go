@@ -57,7 +57,7 @@ func (r *teamRepository) Delete(id uint) error {
 func (r *teamRepository) List(filter models.TeamFilter) ([]models.Team, int64, error) {
 	var teams []models.Team
 	var total int64
-	query := r.db.Model(&models.Sport{})
+	query := r.db.Model(&models.Team{})
 
 	if filter.SportID != nil {
 		query = query.Where("sport_id = ?", *filter.SportID)

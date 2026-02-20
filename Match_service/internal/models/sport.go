@@ -26,7 +26,7 @@ var ValidSport = map[SportName]struct{}{
 }
 
 type TeamFilter struct {
-	SportID  *uint 
-	Page     int
-	PageSize int
+	SportID  *uint `json:"sport_id" binding:"required,gt=0"`
+	Page     int   `json:"page"`
+	PageSize int   `json:"page_size"`
 }

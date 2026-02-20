@@ -9,3 +9,4 @@ type CreateSportRequest struct {
 type SportResponse struct {
 	Name models.SportName `json:"name"`
 }
+

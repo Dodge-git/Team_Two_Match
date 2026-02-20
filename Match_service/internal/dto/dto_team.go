@@ -17,3 +17,4 @@ type TeamListResponse struct {
 	PageSize   int           `json:"page_size"`
 	TotalPages int           `json:"total_pages"`
 }
+

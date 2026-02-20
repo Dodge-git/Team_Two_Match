@@ -130,9 +130,6 @@ func (s *matchService) ListMatches(filter models.MatchFilter) (*dto.MatchListRes
 
 	if filter.SportID != nil {
 		if _, err := s.sportRepo.GetByID(*filter.SportID); err != nil {
-			if errors.Is(err, errs.ErrSportNotFound) {
-				return nil, errs.ErrSportNotFound
-			}
 			return nil, err
 		}
 	}
@@ -188,9 +185,6 @@ func (s *matchService) StartMatch(id uint) error {
 	}
 	match, err := s.matchRepo.GetByID(id)
 	if err != nil {
-		if errors.Is(err, errs.ErrMatchNotFound) {
-			return errs.ErrMatchNotFound
-		}
 		return err
 	}
 	if match.Status != models.MatchStatusScheduled {
@@ -210,9 +204,6 @@ func (s *matchService) FinishMatch(id uint) error {
 	}
 	match, err := s.matchRepo.GetByID(id)
 	if err != nil {
-		if errors.Is(err, errs.ErrMatchNotFound) {
-			return errs.ErrMatchNotFound
-		}
 		return err
 	}
 	if match.Status != models.MatchStatusLive {
@@ -232,9 +223,6 @@ func (s *matchService) CancelMatch(id uint) error {
 	}
 	match, err := s.matchRepo.GetByID(id)
 	if err != nil {
-		if errors.Is(err, errs.ErrMatchNotFound) {
-			return errs.ErrMatchNotFound
-		}
 		return err
 	}
 	if match.Status != models.MatchStatusScheduled {

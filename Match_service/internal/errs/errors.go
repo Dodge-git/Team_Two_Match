@@ -9,7 +9,6 @@ var (
 	ErrTeamNotFound    = errors.New("team not found")
 	ErrInvalidTeamID   = errors.New("invalid team id")
 	ErrInvalidTeamName = errors.New("invalid team name")
-	
 
 	ErrMatchNotFound      = errors.New("match not found")
 	ErrInvalidMatchStatus = errors.New("invalid match status")
@@ -20,5 +19,8 @@ var (
 
 	ErrInvalidGoalEvent = errors.New("invalid goal event: team is not part of the match or match is not live")
 
-	ErrInvalidSport = errors.New("invalid sport")
+	ErrInvalidSport   = errors.New("invalid sport")
+	ErrInvalidSportID = errors.New("invalid sport id")
+
+	ErrInvalidCity = errors.New("invalid city")
 )

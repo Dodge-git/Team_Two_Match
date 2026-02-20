@@ -1,7 +1,6 @@
 package service
 
 import (
-	"errors"
 	"match_service/internal/dto"
 	"match_service/internal/errs"
 	"match_service/internal/models"
@@ -13,7 +12,7 @@ type TeamService interface {
 	Create(req dto.CreateTeamRequest) (*models.Team, error)
 	GetByID(id uint) (*models.Team, error)
 	Delete(id uint) error
-	List(filter models.TeamFilter) ([]models.Team, error)
+	List(filter models.TeamFilter) ([]models.Team, int64, error)
 }
 
 type teamService struct {
@@ -26,7 +25,7 @@ func NewTeamService(teamRepo repository.TeamRepository) TeamService {
 
 func (s *teamService) Create(req dto.CreateTeamRequest) (*models.Team, error) {
 	if req.SportID == 0 {
-		return nil, errs.ErrInvalidTeamID
+		return nil, errs.ErrInvalidSportID
 	}
 	name := strings.TrimSpace(req.Name)
 	if name == "" {
@@ -38,7 +37,7 @@ func (s *teamService) Create(req dto.CreateTeamRequest) (*models.Team, error) {
 	}
 	city := strings.TrimSpace(req.City)
 	if city == "" {
-		return nil, errs.ErrInvalidTeamName
+		return nil, errs.ErrInvalidCity
 	}
 
 	team := &models.Team{
@@ -59,9 +58,6 @@ func (s *teamService) GetByID(id uint) (*models.Team, error) {
 	}
 	team, err := s.teamRepo.GetByID(id)
 	if err != nil {
-		if errors.Is(err, errs.ErrTeamNotFound) {
-			return nil, errs.ErrTeamNotFound
-		}
 		return nil, err
 	}
 	return team, nil
@@ -74,10 +70,27 @@ func (s *teamService) Delete(id uint) error {
 	return s.teamRepo.Delete(id)
 }
 
-func (s *teamService) List(filter models.TeamFilter) ([]models.Team, error) {
-	teams, _, err := s.teamRepo.List(filter)
-	if err != nil {
-		return nil, err
+func (s *teamService) List(filter models.TeamFilter) ([]models.Team, int64, error) {
+	if filter.Page < 1 {
+		filter.Page = 1
 	}
-	return teams, nil
+
+	if filter.PageSize <= 0 {
+		filter.PageSize = 10
+	}
+
+	if filter.PageSize > 100 {
+		filter.PageSize = 100
+	}
+
+	if filter.SportID != nil {
+		if *filter.SportID == 0 {
+			return nil, 0, errs.ErrInvalidSportID
+		}
+	}
+	teams, total, err := s.teamRepo.List(filter)
+	if err != nil {
+		return nil, 0, err
+	}
+	return teams, total, nil
 }
