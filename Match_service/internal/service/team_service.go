@@ -16,11 +16,12 @@ type TeamService interface {
 }
 
 type teamService struct {
-	teamRepo repository.TeamRepository
+	teamRepo  repository.TeamRepository
+	sportRepo repository.SportRepository
 }
 
-func NewTeamService(teamRepo repository.TeamRepository) TeamService {
-	return &teamService{teamRepo: teamRepo}
+func NewTeamService(teamRepo repository.TeamRepository, sportRepo repository.SportRepository) TeamService {
+	return &teamService{teamRepo: teamRepo, sportRepo: sportRepo}
 }
 
 func (s *teamService) Create(req dto.CreateTeamRequest) (*models.Team, error) {
@@ -28,7 +29,7 @@ func (s *teamService) Create(req dto.CreateTeamRequest) (*models.Team, error) {
 		return nil, errs.ErrInvalidSportID
 	}
 
-	if _, err := s.teamRepo.GetByID(req.SportID); err != nil {
+	if _, err := s.sportRepo.GetByID(req.SportID); err != nil {
 		return nil, err
 	}
 	name := strings.TrimSpace(req.Name)
