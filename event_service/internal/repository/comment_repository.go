@@ -9,8 +9,8 @@ type CommentRepository interface {
 	Create(comment *models.Comment) error
 	GetByID(id uint64) (*models.Comment, error)
 
-	GetByEventID(eventID uint64, limit, offset int) ([]*models.Comment, error)
-	GetByCommentaryID(commentaryID uint64, limit, offset int) ([]*models.Comment, error)
+	GetByEventID(eventID uint64, limit, offset int) ([]*models.Comment, int64, error)
+	GetByCommentaryID(commentaryID uint64, limit, offset int) ([]*models.Comment, int64, error)
 
 	Update(comment *models.Comment) error
 	Delete(id uint64) error
@@ -38,30 +38,48 @@ func (r *gormCommentRepository) GetByID(id uint64) (*models.Comment, error) {
 	return &comment, nil
 }
 
-func (r *gormCommentRepository) GetByEventID(eventID uint64, limit, offset int) ([]*models.Comment, error) {
+func (r *gormCommentRepository) GetByEventID(eventID uint64, limit, offset int) ([]*models.Comment, int64, error) {
 	var comments []*models.Comment
+	var total int64
 
-	err := r.db.
-		Where("event_id = ?", eventID).
+	query := r.db.Model(&models.Comment{}).
+		Where("event_id = ?", eventID)
+
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	if err := query.
 		Order("created_at DESC").
 		Limit(limit).
 		Offset(offset).
-		Find(&comments).Error
+		Find(&comments).Error; err != nil {
+		return nil, 0, err
+	}
 
-	return comments, err
+	return comments, total, nil
 }
 
-func (r *gormCommentRepository) GetByCommentaryID(commentaryID uint64, limit, offset int) ([]*models.Comment, error) {
+func (r *gormCommentRepository) GetByCommentaryID(commentaryID uint64, limit, offset int) ([]*models.Comment, int64, error) {
 	var comments []*models.Comment
+	var total int64
 
-	err := r.db.
-		Where("commentary_id = ?", commentaryID).
+	query := r.db.Model(&models.Comment{}).
+		Where("commentary_id = ?", commentaryID)
+
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	if err := query.
 		Order("created_at DESC").
 		Limit(limit).
 		Offset(offset).
-		Find(&comments).Error
+		Find(&comments).Error; err != nil {
+		return nil, 0, err
+	}
 
-	return comments, err
+	return comments, total, nil
 }
 
 func (r *gormCommentRepository) Update(comment *models.Comment) error {
