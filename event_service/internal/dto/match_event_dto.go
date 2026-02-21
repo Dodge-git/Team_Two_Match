@@ -14,7 +14,7 @@ const (
 type CreateMatchEventRequest struct {
 	MatchID   uint64 `json:"match_id" binding:"required"`
 	EventType string `json:"event_type" binding:"required,oneof=goal yellow_card red_card substitution penalty var_decision half_start half_end full_time injury timeout"`
-	Minute    int    `json:"minute" binding:"required,min=0"`
+	Minute    int    `json:"minute" binding:"gte=0"`
 	Period    *int   `json:"period,omitempty"`
 
 	TeamID   *uint64 `json:"team_id,omitempty"`
