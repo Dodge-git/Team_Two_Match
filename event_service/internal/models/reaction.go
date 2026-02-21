@@ -15,10 +15,10 @@ const (
 type Reaction struct {
 	ID uint64 `json:"id" gorm:"primaryKey"`
 
-	UserID uint64 `json:"user_id" gorm:"not null;index"`
+	UserID uint64 `json:"user_id" gorm:"not null;uniqueIndex:idx_user_event;uniqueIndex:idx_user_commentary"`
 
-	EventID      *uint64 `json:"event_id,omitempty" gorm:"index"`
-	CommentaryID *uint64 `json:"commentary_id,omitempty" gorm:"index"`
+	EventID      *uint64 `json:"event_id,omitempty" gorm:"uniqueIndex:idx_user_event"`
+	CommentaryID *uint64 `json:"commentary_id,omitempty" gorm:"uniqueIndex:idx_user_commentary"`
 
 	Type ReactionType `json:"type" gorm:"type:varchar(20);not null"`
 
