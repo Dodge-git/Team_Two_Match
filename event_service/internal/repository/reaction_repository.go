@@ -17,6 +17,9 @@ type ReactionRepository interface {
 
 	GetGroupedByEvent(eventID uint64) (map[string]int64, error)
 	GetGroupedByCommentary(commentaryID uint64) (map[string]int64, error)
+
+	GetEventReactionSummary(eventIDs []uint64) (map[uint64]map[string]int, error)
+    GetCommentaryReactionSummary(commentaryIDs []uint64) (map[uint64]map[string]int, error)
 }
 
 type gormReactionRepository struct {
@@ -129,4 +132,69 @@ func (r *gormReactionRepository) GetGroupedByCommentary(commentaryID uint64) (ma
 
 	return response, nil
 
+}
+
+
+func (r *gormReactionRepository) GetEventReactionSummary(eventIDs []uint64) (map[uint64]map[string]int, error) {
+
+	type result struct {
+		EventID uint64
+		Type    string
+		Count   int
+	}
+
+	var rows []result
+
+	err := r.db.Model(&models.Reaction{}).
+		Select("event_id, type, COUNT(*) as count").
+		Where("event_id IN ?", eventIDs).
+		Group("event_id, type").
+		Scan(&rows).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	response := make(map[uint64]map[string]int)
+
+	for _, row := range rows {
+		if response[row.EventID] == nil {
+			response[row.EventID] = make(map[string]int)
+		}
+		response[row.EventID][row.Type] = row.Count
+	}
+
+	return response, nil
+}
+
+func (r *gormReactionRepository) GetCommentaryReactionSummary(commentaryIDs []uint64) (map[uint64]map[string]int, error) {
+
+	type result struct {
+		CommentaryID uint64
+		Type         string
+		Count        int
+	}
+
+	var rows []result
+
+	err := r.db.Model(&models.Reaction{}).
+		Select("commentary_id, type, COUNT(*) as count").
+		Where("commentary_id IN ?", commentaryIDs).
+		Group("commentary_id, type").
+		Scan(&rows).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	response := make(map[uint64]map[string]int)
+
+	for _, row := range rows {
+		if response[row.CommentaryID] == nil {
+			response[row.CommentaryID] = make(map[string]int)
+		}
+		response[row.CommentaryID][row.Type] = row.Count
+	}
+
+	return response, nil
 }

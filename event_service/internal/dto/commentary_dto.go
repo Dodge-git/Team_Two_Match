@@ -4,7 +4,7 @@ import "time"
 
 type CreateCommentaryRequest struct {
 	MatchID uint64 `json:"match_id" binding:"required"`
-	Minute  int    `json:"minute" binding:"required,min=0"`
+	Minute  int    `json:"minute" binding:"gte=0"`
 
 	Text string `json:"text" binding:"required,min=1,max=2000"`
 }
