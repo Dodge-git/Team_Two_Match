@@ -4,9 +4,9 @@
 /tmp/
 
 # Секреты и конфиги
-*.env
+.env
 *.local
 
 # IDE
 .idea/
-*.vscode/
+.vscode/
