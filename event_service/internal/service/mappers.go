@@ -50,3 +50,34 @@ func buildListResponse(comments []*models.Comment, total int64, page, pageSize i
 		TotalPages: totalPages,
 	}
 }
+
+func mapReactionToDTO(r *models.Reaction) *dto.ReactionResponse {
+	return &dto.ReactionResponse{
+		ID:           r.ID,
+		UserID:       r.UserID,
+		EventID:      r.EventID,
+		CommentaryID: r.CommentaryID,
+		Type:         string(r.Type),
+		CreatedAt:    r.CreatedAt,
+		UpdatedAt:    r.UpdatedAt,
+	}
+}
+
+func buildReactionSummary(data map[string]int64) *dto.ReactionSummaryResponse {
+
+	like := int(data["like"])
+	fire := int(data["fire"])
+	shock := int(data["shock"])
+	sad := int(data["sad"])
+	laugh := int(data["laugh"])
+
+	return &dto.ReactionSummaryResponse{
+		Like:  like,
+		Fire:  fire,
+		Shock: shock,
+		Sad:   sad,
+		Laugh: laugh,
+		Total: like + fire + shock + sad + laugh,
+	}
+
+}

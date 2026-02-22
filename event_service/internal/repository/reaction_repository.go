@@ -19,7 +19,7 @@ type ReactionRepository interface {
 	GetGroupedByCommentary(commentaryID uint64) (map[string]int64, error)
 
 	GetEventReactionSummary(eventIDs []uint64) (map[uint64]map[string]int, error)
-    GetCommentaryReactionSummary(commentaryIDs []uint64) (map[uint64]map[string]int, error)
+	GetCommentaryReactionSummary(commentaryIDs []uint64) (map[uint64]map[string]int, error)
 }
 
 type gormReactionRepository struct {
@@ -133,7 +133,6 @@ func (r *gormReactionRepository) GetGroupedByCommentary(commentaryID uint64) (ma
 	return response, nil
 
 }
-
 
 func (r *gormReactionRepository) GetEventReactionSummary(eventIDs []uint64) (map[uint64]map[string]int, error) {
 
