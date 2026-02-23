@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"match_service/internal/dto"
 	"match_service/internal/errs"
 	"match_service/internal/models"
@@ -37,7 +38,7 @@ func (h *TeamHandler) CreateTeam(c *gin.Context) {
 	}
 	team, err := h.teamService.Create(req)
 	if err != nil {
-		if err == errs.ErrInvalidSportID || err == errs.ErrInvalidTeamName || err == errs.ErrInvalidCity {
+		if errors.Is(err, errs.ErrInvalidSportID) || errors.Is(err, errs.ErrInvalidTeamName) || errors.Is(err, errs.ErrInvalidCity) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		} else {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -56,7 +57,7 @@ func (h *TeamHandler) GetTeamByID(c *gin.Context) {
 	}
 	team, err := h.teamService.GetByID(uint(id))
 	if err != nil {
-		if err == errs.ErrTeamNotFound {
+		if errors.Is(err, errs.ErrTeamNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		} else {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -75,7 +76,7 @@ func (h *TeamHandler) DeleteTeam(c *gin.Context) {
 	}
 	_, err = h.teamService.GetByID(uint(id))
 	if err != nil {
-		if err == errs.ErrTeamNotFound {
+		if errors.Is(err, errs.ErrTeamNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		} else {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -124,7 +125,6 @@ func (h *TeamHandler) ListTeams(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, dto.TeamListResponse{
-		SportID:  *filter.SportID,
 		Data:     teams,
 		Total:    total,
 		Page:     filter.Page,

@@ -213,7 +213,7 @@ func (h *MatchHandler) GoalEvent(c *gin.Context) {
 }
 
 func (h *MatchHandler) GetActiveMatches(c *gin.Context) {
-	var matches []models.Match
+
 	matches, err := h.matchService.GetActive()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

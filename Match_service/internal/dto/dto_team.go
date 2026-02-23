@@ -11,9 +11,9 @@ type CreateTeamRequest struct {
 	City      string `json:"city" binding:"required,min=2,max=100"`
 }
 type TeamListResponse struct {
-	Data       []models.Team `json:"data"`
-	Total      int64         `json:"total"`
-	Page       int           `json:"page"`
-	PageSize   int           `json:"page_size"`
+	SportID  uint          `json:"sport_id"`
+	Data     []models.Team `json:"data"`
+	Total    int64         `json:"total"`
+	Page     int           `json:"page"`
+	PageSize int           `json:"page_size"`
 }
-

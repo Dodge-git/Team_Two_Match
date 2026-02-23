@@ -38,7 +38,10 @@ func (h *SportHandler) CreateSport(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, sport.Name)
+	c.JSON(http.StatusCreated, &dto.SportResponse{
+		ID:   sport.ID,
+		Name: sport.Name,
+	})
 }
 
 func (h *SportHandler) ListSports(c *gin.Context) {
