@@ -2,23 +2,31 @@ package handler
 
 import "github.com/gin-gonic/gin"
 
-func RegisterRoutes(r *gin.Engine, handler *ReactionHandler) {
+func RegisterRoutes(r *gin.Engine,
+	reactionHandler *ReactionHandler,
+	matchEventHandler *MatchEventHandler,
+) {
 	api := r.Group("/api")
-
-	reactions := api.Group("/reactions")
-	{
-		reactions.POST("", handler.SetReaction)
-	}
 
 	events := api.Group("/events")
 	{
-		events.GET("/:id/reactions/summary", handler.GetEventSummary)
-		events.GET("/:id/my-reaction", handler.GetMyEventReaction)
+		events.POST("", matchEventHandler.CreateMatchEvent)
+		events.GET("/:id", matchEventHandler.GetMatchEventByID)
+		events.GET("/match/:match_id", matchEventHandler.GetMatchEvents)
+		events.GET("/match/:match_id/timeline", matchEventHandler.GetMatchTimeline)
 	}
 
-	commentary := api.Group("/commentary")
+	reactions := api.Group("/reactions")
 	{
-		commentary.GET("/:id/reactions/summary", handler.GetCommentarySummary)
-		commentary.GET("/:id/my-reaction", handler.GetMyCommentaryReaction)
+		reactions.POST("", reactionHandler.SetReaction)
+	}
+
+	events.GET("/:id/reactions/summary", reactionHandler.GetEventSummary)
+	events.GET("/:id/reactions/me", reactionHandler.GetMyEventReaction)
+
+	commentaries := api.Group("/commentaries")
+	{
+		commentaries.GET("/:id/reactions/summary", reactionHandler.GetCommentarySummary)
+		commentaries.GET("/:id/reactions/me", reactionHandler.GetMyCommentaryReaction)
 	}
 }
