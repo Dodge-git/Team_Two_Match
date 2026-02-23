@@ -16,3 +16,9 @@ type Team struct {
 	HomeMatches []Match `json:"-" gorm:"foreignKey:HomeTeamID"`
 	AwayMatches []Match `json:"-" gorm:"foreignKey:AwayTeamID"`
 }
+
+type TeamFilter struct {
+	SportID  *uint `json:"sport_id" binding:"required,gt=0"`
+	Page     int   `json:"page"`
+	PageSize int   `json:"page_size"`
+}

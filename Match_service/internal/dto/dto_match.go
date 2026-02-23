@@ -14,14 +14,6 @@ type CreateMatchRequest struct {
 	TournamentName string    `json:"tournament_name,omitempty" binding:"omitempty,max=255"`
 }
 
-type StartMatchRequest struct {
-	StartedAt *time.Time `json:"started_at,omitempty"`
-}
-
-type FinishMatchRequest struct {
-	FinishedAt *time.Time `json:"finished_at,omitempty"`
-}
-
 type UpdateScoreRequest struct {
 	HomeScore int `json:"home_score" binding:"gte=0"`
 	AwayScore int `json:"away_score" binding:"gte=0"`

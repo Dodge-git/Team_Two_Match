@@ -1,4 +1,4 @@
-package service
+package services
 
 import (
 	"errors"
@@ -238,9 +238,18 @@ func (s *matchService) GoalEvent(event models.GoalEvent) error {
 	if event.MatchID == 0 || event.TeamID == 0 {
 		return errors.New("invalid id")
 	}
+	match, err := s.matchRepo.GetByID(event.MatchID)
+	if err != nil {
+		return err
+	}
+	if match.Status != models.MatchStatusLive {
+		return errors.New("match is not live")
+	}
+
 	return s.matchRepo.IncrementScore(event.MatchID, event.TeamID)
 }
 
 func (s *matchService) GetActive() ([]models.Match, error) {
+	
 	return s.matchRepo.GetActive()
 }

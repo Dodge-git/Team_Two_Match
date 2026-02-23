@@ -7,6 +7,6 @@ type CreateSportRequest struct {
 }
 
 type SportResponse struct {
+	ID   uint             `json:"id"`
 	Name models.SportName `json:"name"`
 }
-

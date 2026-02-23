@@ -1,4 +1,4 @@
-package service
+package services
 
 import (
 	"match_service/internal/dto"
