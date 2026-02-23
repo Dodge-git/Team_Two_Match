@@ -93,6 +93,7 @@ func (h *TeamHandler) DeleteTeam(c *gin.Context) {
 func (h *TeamHandler) ListTeams(c *gin.Context) {
 	var filter models.TeamFilter
 	sportIDParam := c.Query("sport_id")
+
 	if sportIDParam != "" {
 		sportIDParam, err := strconv.ParseUint(sportIDParam, 10, 64)
 		if err != nil {
@@ -100,7 +101,9 @@ func (h *TeamHandler) ListTeams(c *gin.Context) {
 			return
 		}
 		sportID := uint(sportIDParam)
-		filter.SportID = &sportID
+		if filter.SportID != nil {
+			filter.SportID = &sportID
+		}
 	}
 	if pageParam := c.Query("page"); pageParam != "" {
 		page, err := strconv.Atoi(pageParam)
@@ -125,6 +128,7 @@ func (h *TeamHandler) ListTeams(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, dto.TeamListResponse{
+		SportID:  *filter.SportID,
 		Data:     teams,
 		Total:    total,
 		Page:     filter.Page,

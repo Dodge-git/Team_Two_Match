@@ -209,7 +209,9 @@ func (h *MatchHandler) CancelMatch(c *gin.Context) {
 }
 
 func (h *MatchHandler) GoalEvent(c *gin.Context) {
-	// Implementation for recording a goal event
+
+
+
 }
 
 func (h *MatchHandler) GetActiveMatches(c *gin.Context) {
