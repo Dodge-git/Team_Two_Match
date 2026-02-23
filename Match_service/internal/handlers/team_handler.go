@@ -45,7 +45,13 @@ func (h *TeamHandler) CreateTeam(c *gin.Context) {
 		}
 		return
 	}
-	c.JSON(http.StatusCreated, team)
+	c.JSON(http.StatusCreated, &dto.CreateTeamResponse{
+		ID:        team.ID,
+		Name:      team.Name,
+		ShortName: team.ShortName,
+		City:      team.City,
+		SportID:   team.SportID,
+	})
 }
 
 func (h *TeamHandler) GetTeamByID(c *gin.Context) {
@@ -92,43 +98,18 @@ func (h *TeamHandler) DeleteTeam(c *gin.Context) {
 
 func (h *TeamHandler) ListTeams(c *gin.Context) {
 	var filter models.TeamFilter
-	sportIDParam := c.Query("sport_id")
-
-	if sportIDParam != "" {
-		sportIDParam, err := strconv.ParseUint(sportIDParam, 10, 64)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid sport id"})
-			return
-		}
-		sportID := uint(sportIDParam)
-		
-			filter.SportID = &sportID
-	
-	}
-	if pageParam := c.Query("page"); pageParam != "" {
-		page, err := strconv.Atoi(pageParam)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid page"})
-			return
-		}
-		filter.Page = page
-	}
-
-	if pageSizeStr := c.Query("page_size"); pageSizeStr != "" {
-		pageSize, err := strconv.Atoi(pageSizeStr)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid page_size"})
-			return
-		}
-		filter.PageSize = pageSize
+	if err := c.ShouldBindQuery(&filter); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 	teams, total, err := h.teamService.List(filter)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
 	c.JSON(http.StatusOK, dto.TeamListResponse{
-		SportID:  *filter.SportID,
+		SportID:  filter.SportID,
 		Data:     teams,
 		Total:    total,
 		Page:     filter.Page,

@@ -6,12 +6,12 @@ import (
 )
 
 type CreateMatchRequest struct {
-	SportID        uint      `json:"sport_id" binding:"required,gt=0"`
-	HomeTeamID     uint      `json:"home_team_id" binding:"required,gt=0,nefield=AwayTeamID"`
-	AwayTeamID     uint      `json:"away_team_id" binding:"required,gt=0,nefield=HomeTeamID"`
-	ScheduledAt    time.Time `json:"scheduled_at" binding:"required"`
-	Venue          string    `json:"venue,omitempty" binding:"omitempty,max=255"`
-	TournamentName string    `json:"tournament_name,omitempty" binding:"omitempty,max=255"`
+	SportID        uint       `json:"sport_id" binding:"required,gt=0"`
+	HomeTeamID     uint       `json:"home_team_id" binding:"required,gt=0,nefield=AwayTeamID"`
+	AwayTeamID     uint       `json:"away_team_id" binding:"required,gt=0,nefield=HomeTeamID"`
+	ScheduledAt    *time.Time `json:"scheduled_at" binding:"required"`
+	Venue          string     `json:"venue,omitempty" binding:"omitempty,max=255"`
+	TournamentName string     `json:"tournament_name,omitempty" binding:"omitempty,max=255"`
 }
 
 type UpdateScoreRequest struct {

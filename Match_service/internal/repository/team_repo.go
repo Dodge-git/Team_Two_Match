@@ -57,6 +57,7 @@ func (r *teamRepository) Delete(id uint) error {
 func (r *teamRepository) List(filter models.TeamFilter) ([]models.Team, int64, error) {
 	var teams []models.Team
 	var total int64
+
 	query := r.db.Model(&models.Team{})
 
 	if filter.SportID != nil {
@@ -65,14 +66,6 @@ func (r *teamRepository) List(filter models.TeamFilter) ([]models.Team, int64, e
 
 	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err
-	}
-
-	if filter.Page < 1 {
-		filter.Page = 1
-	}
-
-	if filter.PageSize <= 0 {
-		filter.PageSize = 10
 	}
 
 	offset := (filter.Page - 1) * filter.PageSize

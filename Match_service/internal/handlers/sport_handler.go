@@ -50,6 +50,13 @@ func (h *SportHandler) ListSports(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
-	c.JSON(http.StatusOK, list)
+	var dtoList []dto.SportResponse
+	for _, sport := range list {
+		sportResponse := dto.SportResponse{
+			ID:   sport.ID,
+			Name: sport.Name,
+		}
+		dtoList = append(dtoList, sportResponse)
+	}
+	c.JSON(http.StatusOK, dtoList)
 }

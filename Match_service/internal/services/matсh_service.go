@@ -17,7 +17,7 @@ type MatchService interface {
 	StartMatch(id uint) error
 	FinishMatch(id uint) error
 	CancelMatch(id uint) error
-	GoalEvent(event models.GoalEvent) error
+	IncrementGoal(event models.GoalEvent) error
 	GetActive() ([]models.Match, error)
 }
 
@@ -63,12 +63,16 @@ func (s *matchService) CreateMatch(req dto.CreateMatchRequest) (*models.Match, e
 		return nil, errs.ErrTeamsNotInSport
 	}
 
+	if req.ScheduledAt == nil || req.ScheduledAt.Before(time.Now()) {
+		return nil, errors.New("scheduled_at must be a future date and time")
+	}
+
 	match := &models.Match{
 		SportID:        req.SportID,
 		HomeTeamID:     homeTeam.ID,
 		AwayTeamID:     awayTeam.ID,
 		Status:         models.MatchStatusScheduled,
-		ScheduledAt:    req.ScheduledAt,
+		ScheduledAt:    *req.ScheduledAt,
 		Venue:          req.Venue,
 		TournamentName: req.TournamentName,
 	}
@@ -234,7 +238,7 @@ func (s *matchService) CancelMatch(id uint) error {
 	return s.matchRepo.Update(match)
 }
 
-func (s *matchService) GoalEvent(event models.GoalEvent) error {
+func (s *matchService) IncrementGoal(event models.GoalEvent) error {
 	if event.MatchID == 0 || event.TeamID == 0 {
 		return errors.New("invalid id")
 	}
@@ -250,6 +254,6 @@ func (s *matchService) GoalEvent(event models.GoalEvent) error {
 }
 
 func (s *matchService) GetActive() ([]models.Match, error) {
-	
+
 	return s.matchRepo.GetActive()
 }

@@ -88,11 +88,10 @@ func (s *teamService) List(filter models.TeamFilter) ([]models.Team, int64, erro
 		filter.PageSize = 100
 	}
 
-	if filter.SportID != nil {
-		if *filter.SportID == 0 {
-			return nil, 0, errs.ErrInvalidSportID
-		}
+	if filter.SportID != nil && *filter.SportID == 0 {
+		return nil, 0, errs.ErrInvalidSportID
 	}
+
 	teams, total, err := s.teamRepo.List(filter)
 	if err != nil {
 		return nil, 0, err
