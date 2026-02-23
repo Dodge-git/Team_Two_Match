@@ -15,7 +15,7 @@ func main() {
 
 	db := config.SetUpDatabaseConnection()
 
-	if err := db.AutoMigrate(&models.Sport{}, &models.Player{}, models.Team{}, &models.Match{}); err != nil {
+	if err := db.AutoMigrate(&models.Sport{}, &models.Player{}, &models.Team{}, &models.Match{}); err != nil {
 		log.Fatalf("не удалось выполнить миграции: %v", err)
 	}
 
