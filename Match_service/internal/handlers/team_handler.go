@@ -101,9 +101,9 @@ func (h *TeamHandler) ListTeams(c *gin.Context) {
 			return
 		}
 		sportID := uint(sportIDParam)
-		if filter.SportID != nil {
+		
 			filter.SportID = &sportID
-		}
+	
 	}
 	if pageParam := c.Query("page"); pageParam != "" {
 		page, err := strconv.Atoi(pageParam)
