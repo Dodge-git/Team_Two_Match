@@ -7,8 +7,8 @@ type Team struct {
 	SportID uint  `json:"sport_id" gorm:"not null"`
 	Sport   Sport `json:"-" gorm:"foreignKey:SportID"`
 
-	Name      string `json:"name" gorm:"not null;size:100"`
-	ShortName string `json:"short_name" gorm:"not null;size:16"`
+	Name      string `json:"name" gorm:"uniqueIndex;not null;size:100"`
+	ShortName string `json:"short_name" gorm:"uniqueIndex;not null;size:16"`
 	City      string `json:"city" gorm:"not null;size:100"`
 
 	Players []Player `json:"-"`
@@ -18,7 +18,7 @@ type Team struct {
 }
 
 type TeamFilter struct {
-	SportID  *uint `json:"sport_id" binding:"required,gt=0"`
-	Page     int   `json:"page"`
-	PageSize int   `json:"page_size"`
+	SportID  *uint `form:"sport_id" binding:"omitempty,gt=0"`
+	Page     int   `form:"page"`
+	PageSize int   `form:"page_size"`
 }

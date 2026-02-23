@@ -5,7 +5,7 @@ import (
 	"match_service/internal/dto"
 	"match_service/internal/errs"
 	"match_service/internal/models"
-	services "match_service/internal/service"
+	"match_service/internal/services"
 	"net/http"
 	"strconv"
 	"time"
@@ -25,6 +25,7 @@ func (h *MatchHandler) RegisterRoutes(router *gin.Engine) {
 	matches := router.Group("/matches")
 	{
 		matches.POST("/", h.CreateMatch)
+		matches.GET("/active", h.GetActiveMatches)
 		matches.GET("/", h.ListMatches)
 		matches.GET("/:id", h.GetMatchByID)
 		matches.DELETE("/:id", h.DeleteMatch)
@@ -32,7 +33,6 @@ func (h *MatchHandler) RegisterRoutes(router *gin.Engine) {
 		matches.PATCH("/start/:id", h.StartMatch)
 		matches.PATCH("/cancel/:id", h.CancelMatch)
 		matches.POST("/goal", h.GoalEvent)
-		matches.GET("/active", h.GetActiveMatches)
 	}
 }
 
@@ -209,8 +209,6 @@ func (h *MatchHandler) CancelMatch(c *gin.Context) {
 }
 
 func (h *MatchHandler) GoalEvent(c *gin.Context) {
-
-
 
 }
 
