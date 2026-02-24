@@ -25,6 +25,7 @@ type matchService struct {
 	matchRepo repository.MatchRepository
 	sportRepo repository.SportRepository
 	teamRepo  repository.TeamRepository
+	//kafkaConsumer kafka.Consumer
 }
 
 func NewMatchService(matchRepo repository.MatchRepository, sportRepo repository.SportRepository, teamRepo repository.TeamRepository) MatchService {
@@ -63,7 +64,7 @@ func (s *matchService) CreateMatch(req dto.CreateMatchRequest) (*models.Match, e
 		return nil, errs.ErrTeamsNotInSport
 	}
 
-	if req.ScheduledAt == nil || req.ScheduledAt.Before(time.Now()) {
+	if req.ScheduledAt == nil || req.ScheduledAt.Before(time.Now().UTC()) {
 		return nil, errors.New("scheduled_at must be a future date and time")
 	}
 
@@ -241,13 +242,6 @@ func (s *matchService) CancelMatch(id uint) error {
 func (s *matchService) IncrementGoal(event models.GoalEvent) error {
 	if event.MatchID == 0 || event.TeamID == 0 {
 		return errors.New("invalid id")
-	}
-	match, err := s.matchRepo.GetByID(event.MatchID)
-	if err != nil {
-		return err
-	}
-	if match.Status != models.MatchStatusLive {
-		return errors.New("match is not live")
 	}
 
 	return s.matchRepo.IncrementScore(event.MatchID, event.TeamID)
