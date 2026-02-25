@@ -57,6 +57,7 @@ type MatchGoalMessage struct {
 	TeamID   uint64  `json:"team_id"`
 	PlayerID *uint64 `json:"player_id,omitempty"`
 	Minute   int     `json:"minute"`
+	NewScore int     `json:"new_score"`
 }
 
 type MatchEventListResponse struct {

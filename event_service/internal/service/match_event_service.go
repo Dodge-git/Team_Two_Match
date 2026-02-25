@@ -28,6 +28,7 @@ type MatchEventService interface {
 type KafkaProducer interface {
 	PublishMatchEventCreated(msg dto.MatchEventCreatedMessage) error
 	PublishMatchGoal(msg dto.MatchGoalMessage) error
+	Close() error
 }
 
 type matchEventService struct {
@@ -97,17 +98,23 @@ func (s *matchEventService) CreateMatchEvent(ctx context.Context, req dto.Create
 	if err := s.producer.PublishMatchEventCreated(eventMsg); err != nil {
 		log.Printf("failed to publish match.event.created: %v", err)
 	}
-
 	if event.EventType == models.EventGoal && event.TeamID != nil {
+
+		count, err := s.matchEventRepo.CountGoalsByMatchAndTeam(event.MatchID, *event.TeamID)
+		if err != nil {
+			return nil, err
+		}
+
 		goalMsg := dto.MatchGoalMessage{
 			MatchID:  event.MatchID,
 			TeamID:   *event.TeamID,
 			PlayerID: event.PlayerID,
 			Minute:   event.Minute,
+			NewScore: count,
 		}
 
 		if err := s.producer.PublishMatchGoal(goalMsg); err != nil {
-			log.Printf("failed to publish match goal: %v", err)
+			log.Printf("failed to publish match.goal: %v", err)
 		}
 	}
 
