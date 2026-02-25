@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"match_service/internal/config"
 	"match_service/internal/handlers"
@@ -23,6 +24,10 @@ func main() {
 
 	db := config.SetUpDatabaseConnection()
 
+	fmt.Println("env", os.Getenv("KAFKA_BROKER"))
+	brokers := strings.Split(os.Getenv("KAFKA_BROKER"), ",")
+	fmt.Println("kafka_broker:", brokers)
+
 	if err := db.AutoMigrate(&models.Sport{}, &models.Player{}, &models.Team{}, &models.Match{}); err != nil {
 		log.Fatalf("не удалось выполнить миграции: %v", err)
 	}
@@ -36,7 +41,6 @@ func main() {
 	teamService := services.NewTeamService(teamRepo, sportRepo)
 	playerService := services.NewPlayerService(playerRepo)
 
-	brokers := strings.Split(os.Getenv("KAFKA_BROKERS"), ",")
 	producer := kafka.NewProducer(brokers)
 
 	matchService := services.NewMatchService(matchRepo, sportRepo, teamRepo, producer)

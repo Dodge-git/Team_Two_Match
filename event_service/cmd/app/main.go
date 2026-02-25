@@ -17,7 +17,7 @@ import (
 func main() {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
-	config.SetEnv(logger)
+	// config.SetEnv(logger)
 
 	db, err := config.DatabaseConnect(logger)
 	if err != nil {

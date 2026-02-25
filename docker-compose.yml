@@ -15,32 +15,29 @@ services:
       - DB_NAME=event_service
       - MATCH_SERVICE_URL=http://match_service:8000
       - KAFKA_BROKER=kafka:9093
-    env_file:
-      - ./event_service/.env
+
     depends_on:
       - db_event
       - match_service
       - kafka
 
-match_service:
-  build:
-    context: ./match_service
-    dockerfile: Dockerfile
-  container_name: match_service
-  ports:
-    - "8001:8000"         
-  environment:
-    - DB_HOST=db_match
-    - DB_PORT=5432
-    - DB_USER=postgres
-    - DB_PASS=postgres
-    - DB_NAME=match_service
-    - KAFKA_BROKER=kafka:9093
-  env_file:
-    - ./match_service/.env
-  depends_on:
-    - db_match
-    - kafka
+  match_service:
+    build:
+      context: ./match_service
+      dockerfile: Dockerfile
+    container_name: match_service
+    ports:
+      - "8001:8000"         
+    environment:
+      - DB_HOST=db_match
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASS=postgres
+      - DB_NAME=match_service
+      - KAFKA_BROKER=kafka:9093
+    depends_on:
+      - db_match
+      - kafka
 
   db_event:
     image: postgres:17
@@ -50,7 +47,7 @@ match_service:
       - POSTGRES_PASSWORD=7213
       - POSTGRES_DB=event_service
     ports:
-      - "5433:5432"
+      - "5499:5432"
     volumes:
       - pg_event:/var/lib/postgresql/data
 
@@ -62,7 +59,7 @@ match_service:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=match_service
     ports:
-      - "5434:5432"
+      - "5489:5432"
     volumes:
       - pg_match:/var/lib/postgresql/data
 
@@ -70,7 +67,7 @@ match_service:
     image: apache/kafka:latest
     container_name: kafka
     ports:
-      - "9092:9092"
+      - "9093:9093"
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
