@@ -4,16 +4,36 @@ services:
     ports:
       - '8080:8080'
     environment:
-      - DB_HOST=db
+      - DB_HOST=db_event
       - DB_PORT=5432
       - DB_USER=postgres
       - DB_PASS=7213
       - DB_NAME=event_service
     env_file:
-      - event_service\.env
+      - ./event_service/.env
     depends_on:
-      - db
+      - db_event
 
+
+match_service:
+  build:
+    context: ./match_service
+    dockerfile: Dockerfile
+  container_name: match_service
+  ports:
+    - "8001:8000"         
+  environment:
+    - DB_HOST=db_match
+    - DB_PORT=5432
+    - DB_USER=postgres
+    - DB_PASS=postgres
+    - DB_NAME=match_service
+    - KAFKA_BROKER=kafka:9093
+  env_file:
+    - ./match_service/.env
+  depends_on:
+    - db_match
+    - kafka
   db:
     image: postgres:17
     environment:
@@ -25,34 +45,36 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data
 
-volumes:
-  pg_data:
-
-
-
+db_match:
+    image: postgres:17
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=match_service
+    ports:
+      - "5434:5432"
+    volumes:
+      - pg_match:/var/lib/postgresql/data
 
   # Kafka — брокер сообщений
-  kafka:
+kafka:
     image: apache/kafka:latest
     container_name: kafka
     ports:
       - "9092:9092"     # Порт для внешних подключений (Go приложения)
     environment:
-      # Режим KRaft (без Zookeeper)
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
-      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9091
-      # Настройки слушателей
-      KAFKA_LISTENERS: CONTROLLER://localhost:9091,HOST://0.0.0.0:9092,DOCKER://0.0.0.0:9093
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9091
+      KAFKA_LISTENERS: CONTROLLER://0.0.0.0:9091,HOST://0.0.0.0:9092,DOCKER://0.0.0.0:9093
       KAFKA_ADVERTISED_LISTENERS: HOST://localhost:9092,DOCKER://kafka:9093
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,DOCKER:PLAINTEXT,HOST:PLAINTEXT
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_INTER_BROKER_LISTENER_NAME: DOCKER
-      # Настройки для single-node кластера
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
   # Kafka UI — веб-интерфейс для просмотра топиков
-  kafka-ui:
+kafka-ui:
     image: kafbat/kafka-ui:main
     container_name: kafka-ui
     ports:
@@ -63,3 +85,6 @@ volumes:
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9093
     depends_on:
       - kafka
+volumes:
+  pg_event:
+  pg_match:
