@@ -5,17 +5,17 @@ import (
 	"encoding/json"
 	"log"
 	"match_service/internal/models"
-	"match_service/internal/services"
+	"match_service/internal/ports"
 
 	"github.com/segmentio/kafka-go"
 )
 
 type Consumer struct {
 	reader       *kafka.Reader
-	matchService services.MatchService
+	matchService ports.MatchService
 }
 
-func NewConsumer(brokers []string, topic string, groupID string, matchService services.MatchService) *Consumer {
+func NewConsumer(brokers []string, topic string, groupID string, matchService ports.MatchService) *Consumer {
 	reader := kafka.NewReader(kafka.ReaderConfig{
 		Brokers:  brokers,
 		Topic:    topic,
@@ -51,7 +51,7 @@ func (c *Consumer) Start(ctx context.Context) {
 			_ = c.reader.CommitMessages(ctx, msg)
 			continue
 		}
-		if err := c.matchService.IncrementGoal(event); err != nil {
+		if err := c.matchService.UpdateScoreFromKafka(ctx, event); err != nil {
 			log.Println("failed to increment goal:", err)
 			continue
 		}

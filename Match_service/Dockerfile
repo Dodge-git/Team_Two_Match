@@ -1,20 +1,23 @@
-FROM golang:1.23-alpine AS builder
+FROM golang:1.26-alpine AS builder
 
-WORKDIR /src
+WORKDIR /app
+
+RUN apk add --no-cache git
 
 COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o /app/main
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o match-service ./cmd/app
 
-FROM alpine:3.18
+FROM alpine:latest
+
+WORKDIR /app
+
 RUN apk add --no-cache ca-certificates
 
-COPY --from=builder /app/main /app/main
+COPY --from=builder /app/match-service .
 
-EXPOSE 8000
+EXPOSE 8080
 
-ENV GIN_MODE=release
-
-ENTRYPOINT ["/main"]
+CMD ["./match-service"]

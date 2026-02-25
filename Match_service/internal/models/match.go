@@ -48,7 +48,15 @@ type MatchFilter struct {
 	PageSize int          `json:"page_size"`
 }
 
+// type GoalEvent struct {
+// 	MatchID uint `json:"match_id"`
+// 	TeamID  uint `json:"team_id"`
+// }
+
 type GoalEvent struct {
-	MatchID uint `json:"match_id"`
-	TeamID  uint `json:"team_id"`
+	MatchID  uint `json:"match_id"`
+	TeamID   uint `json:"team_id"`
+	PlayerID uint `json:"player_id"`
+	Minute   int  `json:"minute"`
+	NewScore int  `json:"new_score"`
 }
