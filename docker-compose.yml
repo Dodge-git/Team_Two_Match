@@ -1,19 +1,27 @@
+
 services:
+
   event_service:
-    build: .
+    build:
+      context: ./event_service
+    container_name: event_service
     ports:
-      - '8080:8080'
+      - "8080:8080"
     environment:
       - DB_HOST=db_event
       - DB_PORT=5432
       - DB_USER=postgres
       - DB_PASS=7213
       - DB_NAME=event_service
+      - MATCH_SERVICE_URL=http://match_service:8000
+      - KAFKA_BROKER=kafka:9093
     env_file:
       - ./event_service/.env
     depends_on:
       - db_event
-      
+      - match_service
+      - kafka
+
 match_service:
   build:
     context: ./match_service
@@ -33,19 +41,22 @@ match_service:
   depends_on:
     - db_match
     - kafka
-  db:
+
+  db_event:
     image: postgres:17
+    container_name: db_event
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=7213
       - POSTGRES_DB=event_service
     ports:
-      - '5433:5432'
+      - "5433:5432"
     volumes:
-      - pg_data:/var/lib/postgresql/data
+      - pg_event:/var/lib/postgresql/data
 
-db_match:
+  db_match:
     image: postgres:17
+    container_name: db_match
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
@@ -55,12 +66,11 @@ db_match:
     volumes:
       - pg_match:/var/lib/postgresql/data
 
-  # Kafka — брокер сообщений
-kafka:
+  kafka:
     image: apache/kafka:latest
     container_name: kafka
     ports:
-      - "9092:9092"     # Порт для внешних подключений (Go приложения)
+      - "9092:9092"
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
@@ -72,8 +82,7 @@ kafka:
       KAFKA_INTER_BROKER_LISTENER_NAME: DOCKER
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
-  # Kafka UI — веб-интерфейс для просмотра топиков
-kafka-ui:
+  kafka-ui:
     image: kafbat/kafka-ui:main
     container_name: kafka-ui
     ports:
@@ -84,6 +93,7 @@ kafka-ui:
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9093
     depends_on:
       - kafka
+
 volumes:
   pg_event:
   pg_match:

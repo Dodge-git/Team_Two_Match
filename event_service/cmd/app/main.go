@@ -32,7 +32,14 @@ func main() {
 
 	matchClient := match.NewClient(os.Getenv("MATCH_SERVICE_URL"))
 
-	producer := service.NewNoOpKafkaProducer()
+	broker := os.Getenv("KAFKA_BROKER")
+	if broker == "" {
+		logger.Error("KAFKA_BROKER is not set")
+		os.Exit(1)
+	}
+	brokers := []string{broker}
+	producer := service.NewKafkaProducer(brokers)
+	defer producer.Close()
 
 	matchEventService := service.NewMatchEventService(
 		matchEventRepo,
