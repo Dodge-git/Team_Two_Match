@@ -17,4 +17,4 @@ EXPOSE 8000
 
 ENV GIN_MODE=release
 
-ENTRYPOINT ["/main"]
+ENTRYPOINT ["./match_service"]

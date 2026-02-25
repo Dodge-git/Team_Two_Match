@@ -40,3 +40,16 @@ type MatchListResponse struct {
 	PageSize int             `json:"page_size"`
 	Total    int64           `json:"total"`
 }
+
+type MatchStartedEvent struct {
+	MatchID  uint   `json:"match_id"`
+	HomeTeam string `json:"home_team"`
+	AwayTeam string `json:"away_team"`
+	Sport    string `json:"sport"`
+}
+
+type MatchEndedEvent struct {
+	MatchID   uint `json:"match_id"`
+	HomeScore int  `json:"home_score"`
+	AwayScore int  `json:"away_score"`
+}

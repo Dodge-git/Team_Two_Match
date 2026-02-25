@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"errors"
 	"match_service/internal/errs"
 	"match_service/internal/models"
@@ -15,7 +16,7 @@ type MatchRepository interface {
 	Delete(id uint) error
 	List(models.MatchFilter) ([]models.Match, int64, error)
 	GetActive() ([]models.Match, error)
-	IncrementScore(matchID uint, teamID uint) error
+	UpdateScoreFromKafka(ctx context.Context, matchID uint, teamID uint, newScore int) error
 }
 
 type matchRepository struct {
@@ -40,7 +41,11 @@ func (r *matchRepository) Create(match *models.Match) error {
 func (r *matchRepository) GetByID(id uint) (*models.Match, error) {
 	var match models.Match
 
-	if err := r.db.First(&match, id).Error; err != nil {
+	if err := r.db.
+		Preload("HomeTeam").
+		Preload("AwayTeam").
+		Preload("Sport").
+		First(&match, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errs.ErrMatchNotFound
 		}
@@ -108,10 +113,10 @@ func (r *matchRepository) GetActive() ([]models.Match, error) {
 	return matches, nil
 }
 
-func (r *matchRepository) IncrementScore(matchID uint, teamID uint) error {
-	result := r.db.Model(&models.Match{}).
-		Where("id = ? AND  status = ? AND home_team_id = ?", matchID, models.MatchStatusLive, teamID).
-		UpdateColumn("home_score", gorm.Expr("home_score + 1"))
+func (r *matchRepository) UpdateScoreFromKafka(ctx context.Context, matchID uint, teamID uint, newScore int) error {
+	result := r.db.WithContext(ctx).Model(&models.Match{}).
+		Where("id = ? AND  status = ? AND home_team_id = ? AND home_score < ?", matchID, models.MatchStatusLive, teamID, newScore).
+		UpdateColumn("home_score", newScore)
 
 	if result.Error != nil {
 		return result.Error
@@ -121,9 +126,9 @@ func (r *matchRepository) IncrementScore(matchID uint, teamID uint) error {
 		return nil
 	}
 
-	result = r.db.Model(&models.Match{}).
-		Where("id = ? AND  status = ? AND away_team_id = ?", matchID, models.MatchStatusLive, teamID).
-		UpdateColumn("away_score", gorm.Expr("away_score + 1"))
+	result = r.db.WithContext(ctx).Model(&models.Match{}).
+		Where("id = ? AND  status = ? AND away_team_id = ? AND away_score < ?", matchID, models.MatchStatusLive, teamID, newScore).
+		UpdateColumn("away_score", newScore)
 
 	if result.Error != nil {
 		return result.Error

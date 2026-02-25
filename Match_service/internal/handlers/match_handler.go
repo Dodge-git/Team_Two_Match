@@ -154,7 +154,7 @@ func (h *MatchHandler) StartMatch(c *gin.Context) {
 		return
 	}
 
-	if err = h.matchService.StartMatch(uint(matchID)); err != nil {
+	if err = h.matchService.StartMatch(c.Request.Context(), uint(matchID)); err != nil {
 		if errors.Is(err, errs.ErrMatchNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		} else if errors.Is(err, errs.ErrInvalidMatchStatus) {
@@ -174,7 +174,7 @@ func (h *MatchHandler) FinishMatch(c *gin.Context) {
 		return
 	}
 
-	if err = h.matchService.FinishMatch(uint(matchID)); err != nil {
+	if err = h.matchService.FinishMatch(c.Request.Context(), uint(matchID)); err != nil {
 		if errors.Is(err, errs.ErrMatchNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		} else if errors.Is(err, errs.ErrInvalidMatchStatus) {

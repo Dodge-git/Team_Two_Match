@@ -13,8 +13,7 @@ services:
       - ./event_service/.env
     depends_on:
       - db_event
-
-
+      
 match_service:
   build:
     context: ./match_service
