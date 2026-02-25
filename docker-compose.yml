@@ -14,11 +14,13 @@ services:
       - DB_PASS=7213
       - DB_NAME=event_service
       - MATCH_SERVICE_URL=http://match_service:8000
+      - KAFKA_BROKER=kafka:9093
     env_file:
       - ./event_service/.env
     depends_on:
       - db_event
       - match_service
+      - kafka
 
   match_service:
     build:
