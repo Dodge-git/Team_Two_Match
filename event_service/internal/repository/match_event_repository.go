@@ -14,6 +14,7 @@ type MatchEventRepository interface {
 	CountByMatchID(matchID uint64) (int64, error)
 
 	Update(event *models.MatchEvent) error
+	CountGoalsByMatchAndTeam(matchID uint64, teamID uint64) (int, error)
 }
 
 type gormMatchEventRepository struct {
@@ -63,4 +64,19 @@ func (r *gormMatchEventRepository) CountByMatchID(matchID uint64) (int64, error)
 
 func (r *gormMatchEventRepository) Update(event *models.MatchEvent) error {
 	return r.db.Save(event).Error
+}
+
+func (r *gormMatchEventRepository) CountGoalsByMatchAndTeam(matchID uint64, teamID uint64) (int, error) {
+	var count int64
+
+	err := r.db.Model(&models.MatchEvent{}).
+		Where("match_id = ? AND team_id = ? AND event_type = ?",
+			matchID, teamID, "goal").
+		Count(&count).Error
+
+	if err != nil {
+		return 0, err
+	}
+
+	return int(count), nil
 }
