@@ -1,12 +1,41 @@
-
 services:
+
+  gateway:
+    build:
+      context: ./gateway
+    container_name: gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - USER_SERVICE_URL=http://user:8000
+      - MATCH_SERVICE_URL=http://match_service:8000
+      - EVENT_SERVICE_URL=http://event_service:8080
+      - JWT_SECRET=hYsEyN01CaMrYsaidAhmad02BysicleNuRaDi03pRiorapoiuytrewwkcdkghdmv
+    depends_on:
+      - user
+      - match_service
+      - event_service
+
+  user:
+    build:
+      context: ./user
+    container_name: user
+    environment:
+      - DB_HOST=db_user
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASS=postgres
+      - DB_NAME=user_service
+      - JWT_SECRET=hYsEyN01CaMrYsaidAhmad02BysicleNuRaDi03pRiorapoiuytrewwkcdkghdmv
+    depends_on:
+      - db_user
 
   event_service:
     build:
       context: ./event_service
     container_name: event_service
     ports:
-      - "8080:8080"
+      - "8082:8080"
     environment:
       - DB_HOST=db_event
       - DB_PORT=5432
@@ -15,7 +44,6 @@ services:
       - DB_NAME=event_service
       - MATCH_SERVICE_URL=http://match_service:8000
       - KAFKA_BROKER=kafka:9093
-
     depends_on:
       - db_event
       - match_service
@@ -24,10 +52,9 @@ services:
   match_service:
     build:
       context: ./match_service
-      dockerfile: Dockerfile
     container_name: match_service
     ports:
-      - "8001:8000"         
+      - "8001:8000"
     environment:
       - DB_HOST=db_match
       - DB_PORT=5432
@@ -38,6 +65,18 @@ services:
     depends_on:
       - db_match
       - kafka
+
+  db_user:
+    image: postgres:17
+    container_name: db_user
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=user_service
+    ports:
+      - "5479:5432"
+    volumes:
+      - pg_user:/var/lib/postgresql/data
 
   db_event:
     image: postgres:17
@@ -92,5 +131,6 @@ services:
       - kafka
 
 volumes:
+  pg_user:
   pg_event:
   pg_match:
