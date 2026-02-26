@@ -1,6 +1,9 @@
 package config
 
-import "os"
+import (
+	"log"
+	"os"
+)
 
 type Config struct {
 	UserServiceURL  string
@@ -18,10 +21,15 @@ func getEnv(key string, defaultValue string) string {
 }
 
 func Load() *Config {
+	jwtSecret := os.Getenv("JWT_SECRET")
+	if jwtSecret == ""{
+		log.Fatal("JWT_SECRET is not set")
+	}
+
 	return &Config{
 		UserServiceURL:  getEnv("USER_SERVICE_URL", "http://user-service:8081"),
 		MatchServiceURL: getEnv("MATCH_SERVICE_URL", "http://match-service:8082"),
 		EventServiceURL: getEnv("EVENT_SERVICE_URL", "http://event-service:8083"),
-		JWTSecret:       getEnv("JWT_SECRET", "secret"),
+		JWTSecret:       jwtSecret,
 	}
 }

@@ -9,8 +9,8 @@ type UserRegister struct {
 }
 
 type UserLogin struct {
-	Email    string `json:"email" binding:"required;email;not null;min=3;max=63"`
-	Password string `json:"password" binding:"required;not null;max=63"`
+	Email    string `json:"email" binding:"required;email;min=3;max=63"`
+	Password string `json:"password" binding:"required;max=63"`
 }
 
 type UserUpdate struct {
