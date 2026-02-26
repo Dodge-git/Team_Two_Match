@@ -11,5 +11,11 @@ const (
 	DeleteProfile    = "delete_profile"
 	DeleteCommentary = "delete_commentary"
 	DeleteComment    = "delete_comment"
-	
+	CreateMatch      = "create_match"
+	DeleteMatch      = "delete_match"
+	AdSport          = "ad_sport"
+	AdTeam           = "ad_team"
+	ManageMatch      = "manage_match"
+	AdGoal           = "ad_goal"
+	AdPlayer         = "ad_player"
 )

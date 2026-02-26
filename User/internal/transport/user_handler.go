@@ -2,6 +2,7 @@ package transport
 
 import (
 	"User/internal/dto"
+	"User/internal/models"
 	"User/internal/services"
 	"net/http"
 	"strconv"
@@ -85,17 +86,21 @@ func (h *UserHandler) UpdateUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"message": "updated"})
 }
 func (h *UserHandler) DeleteUser(ctx *gin.Context) {
-	idParam := ctx.Param("id")
-	id, err := strconv.Atoi(idParam)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+    userIDFromToken := ctx.GetUint("user_id")
+    idParam := ctx.Param("id")
+
+    id, err := strconv.Atoi(idParam) 
+	if err != nil{
+		ctx.JSON(http.StatusBadRequest,gin.H{"error":"invalid value"})
 		return
 	}
 
-	if err := h.userService.DeleteUser(uint(id)); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+    role := ctx.GetString("role")
 
-	ctx.Status(http.StatusNoContent)
+    if role != models.RoleAdmin && uint(id) != userIDFromToken {
+        ctx.JSON(http.StatusForbidden, gin.H{"error": "cannot delete other users"})
+        return
+    }
+
+   
 }
