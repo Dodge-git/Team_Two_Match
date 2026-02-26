@@ -1,5 +1,17 @@
 package auth
 
+func HasPermission(role string,permission string)bool{
+	permissions , exist := RolePermissions[role]
+	if exist == false {
+		return false
+	}
+	for _, r := range permissions{
+		if r == permission{
+			return true
+		}
+	}
+	return false
+}
 var RolePermissions = map[string][]string{
 	RoleUser: {
 		GetProfile,
@@ -35,3 +47,4 @@ var RolePermissions = map[string][]string{
 		EditProfile,
 	},
 }
+
