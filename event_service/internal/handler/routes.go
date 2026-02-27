@@ -9,9 +9,10 @@ func RegisterRoutes(
 	commentHandler *CommentHandler,
 	commentaryHandler *CommentaryHandler,
 ) {
-	api := r.Group("/api/v1")
 
-	events := api.Group("/events")
+	// ================= EVENTS =================
+
+	events := r.Group("/events")
 	{
 		events.GET("/match/:match_id", matchEventHandler.GetMatchEvents)
 		events.GET("/match/:match_id/timeline", matchEventHandler.GetMatchTimeline)
@@ -25,7 +26,9 @@ func RegisterRoutes(
 		events.GET("/:id/comments", commentHandler.GetByEvent)
 	}
 
-	commentaries := api.Group("/commentaries")
+	// ================= COMMENTARIES =================
+
+	commentaries := r.Group("/commentaries")
 	{
 		commentaries.POST("", commentaryHandler.Create)
 		commentaries.GET("/match/:match_id", commentaryHandler.GetByMatch)
@@ -39,15 +42,22 @@ func RegisterRoutes(
 		commentaries.GET("/:id/comments", commentHandler.GetByCommentary)
 	}
 
-	comments := api.Group("/comments")
+	// ================= COMMENTS =================
+
+	comments := r.Group("/comments")
 	{
 		comments.POST("", commentHandler.CreateComment)
 		comments.PATCH("/:id", commentHandler.Update)
 		comments.DELETE("/:id", commentHandler.Delete)
 	}
 
-	reactions := api.Group("/reactions")
+	// ================= REACTIONS =================
+
+	reactions := r.Group("/reactions")
 	{
 		reactions.POST("", reactionHandler.SetReaction)
 	}
+
+
+
 }
