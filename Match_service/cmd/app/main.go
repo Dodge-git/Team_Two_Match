@@ -32,9 +32,13 @@ func main() {
 	if err := db.AutoMigrate(&models.Sport{}, &models.Player{}, &models.Team{}, &models.Match{}); err != nil {
 		log.Fatalf("не удалось выполнить миграции: %v", err)
 	}
+	redisAddr := os.Getenv("REDIS_ADDR")
+	if redisAddr == "" {
+		os.Exit(1)
+	}
 
 	rdb := redis.NewClient(&redis.Options{
-		Addr: "localhost:6379",
+		Addr: redisAddr,
 	})
 	defer rdb.Close()
 

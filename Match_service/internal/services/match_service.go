@@ -303,7 +303,7 @@ func (s *matchService) GetActive() ([]models.Match, error) {
 		return nil, err
 	}
 
-	s.rdb.Set(ctx, "active_matches", data, 5*time.Minute)
+	s.rdb.Set(ctx, "matches:active_matches", data, 5*time.Minute)
 
 	return matches, nil
 
