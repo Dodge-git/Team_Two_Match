@@ -2,11 +2,16 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
+	"time"
 
 	"github.com/mountainman199231/event_service/internal/dto"
 	"github.com/mountainman199231/event_service/internal/models"
 	"github.com/mountainman199231/event_service/internal/repository"
+
+	"github.com/redis/go-redis/v9"
 )
 
 type CommentService interface {
@@ -20,10 +25,26 @@ type CommentService interface {
 
 type commentService struct {
 	commentRepo repository.CommentRepository
+	rdb         *redis.Client // redis
 }
 
-func NewCommentService(commentRepo repository.CommentRepository) CommentService {
-	return &commentService{commentRepo: commentRepo}
+func NewCommentService(commentRepo repository.CommentRepository, rdb *redis.Client) CommentService {
+	return &commentService{
+		commentRepo: commentRepo,
+		rdb:         rdb, // redis
+	}
+}
+
+// redis helper
+func (s *commentService) invalidateCommentaryCache(ctx context.Context, commentaryID uint64) {
+	setKey := fmt.Sprintf("comments:index:%d", commentaryID)
+
+	keys, err := s.rdb.SMembers(ctx, setKey).Result()
+	if err == nil && len(keys) > 0 {
+		s.rdb.Del(ctx, keys...)
+	}
+
+	s.rdb.Del(ctx, setKey)
 }
 
 func (s *commentService) Create(ctx context.Context, userID uint64, req dto.CreateCommentRequest) (*dto.CommentResponse, error) {
@@ -42,6 +63,10 @@ func (s *commentService) Create(ctx context.Context, userID uint64, req dto.Crea
 	if err := s.commentRepo.Create(&comment); err != nil {
 		return nil, err
 	}
+	//redis
+	if comment.CommentaryID != nil {
+		s.invalidateCommentaryCache(ctx, *comment.CommentaryID)
+	}
 
 	return mapCommentToDTO(&comment), nil
 }
@@ -58,8 +83,27 @@ func (s *commentService) GetByEvent(ctx context.Context, eventID uint64, page, p
 	return buildListResponse(comments, total, page, pageSize), nil
 }
 
+// формируем ключ кеша
+func buildCacheKey(commentaryID uint64, page, pageSize int) string {
+	return fmt.Sprintf("comments:%d:%d:%d", commentaryID, page, pageSize)
+}
+
 func (s *commentService) GetByCommentary(ctx context.Context, commentaryID uint64, page, pageSize int) (*dto.CommentListResponse, error) {
 	page, pageSize = normalizePagination(page, pageSize)
+
+	cacheKey := buildCacheKey(commentaryID, page, pageSize)
+	setKey := fmt.Sprintf("comments:index:%d", commentaryID)
+
+	cached, err := s.rdb.Get(ctx, cacheKey).Result()
+	if err == nil {
+		var resp dto.CommentListResponse
+		if err := json.Unmarshal([]byte(cached), &resp); err == nil {
+			return &resp, nil
+		}
+	} else if err != redis.Nil {
+		fmt.Println("redis error:", err)
+	}
+
 	offset := (page - 1) * pageSize
 
 	comments, total, err := s.commentRepo.GetByCommentaryID(commentaryID, pageSize, offset)
@@ -67,7 +111,19 @@ func (s *commentService) GetByCommentary(ctx context.Context, commentaryID uint6
 		return nil, err
 	}
 
-	return buildListResponse(comments, total, page, pageSize), nil
+	resp := buildListResponse(comments, total, page, pageSize)
+
+	data, err := json.Marshal(resp)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.rdb.Set(ctx, cacheKey, data, 5*time.Minute).Err(); err == nil {
+		s.rdb.SAdd(ctx, setKey, cacheKey)
+		s.rdb.Expire(ctx, setKey, 5*time.Minute)
+	}
+
+	return resp, nil
 }
 
 func (s *commentService) UpdateComment(ctx context.Context, userID uint64, id uint64, req dto.UpdateCommentRequest) error {
@@ -83,7 +139,15 @@ func (s *commentService) UpdateComment(ctx context.Context, userID uint64, id ui
 		comment.Text = *req.Text
 	}
 
-	return s.commentRepo.Update(comment)
+	if err := s.commentRepo.Update(comment); err != nil {
+		return err
+	}
+
+	if comment.CommentaryID != nil {
+		s.invalidateCommentaryCache(ctx, *comment.CommentaryID)
+	}
+
+	return nil
 }
 
 func (s *commentService) DeleteComment(ctx context.Context, userID, id uint64) error {
@@ -96,7 +160,14 @@ func (s *commentService) DeleteComment(ctx context.Context, userID, id uint64) e
 		return errors.New("forbidden")
 	}
 
-	return s.commentRepo.Delete(id)
+	if err := s.commentRepo.Delete(id); err != nil {
+		return err
+	}
+
+	if comment.CommentaryID != nil {
+		s.invalidateCommentaryCache(ctx, *comment.CommentaryID)
+	}
+	return nil
 }
 
 func normalizePagination(page, pageSize int) (int, int) {
