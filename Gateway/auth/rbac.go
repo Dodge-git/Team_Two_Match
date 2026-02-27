@@ -1,5 +1,20 @@
 package auth
 
+func HasPermission(role string,permission string)bool{
+	if role == RoleAdmin{
+		return true
+	}
+	permissions , exist := RolePermissions[role]
+	if exist == false {
+		return false
+	}
+	for _, r := range permissions{
+		if r == permission{
+			return true
+		}
+	}
+	return false
+}
 var RolePermissions = map[string][]string{
 	RoleUser: {
 		GetProfile,
@@ -21,17 +36,16 @@ var RolePermissions = map[string][]string{
 		DeleteCommentary,
 		DeleteEvent,
 		DeleteProfile,
+		DeleteMatch,
+		CreateMatch,
+		AdSport ,
+		AdTeam ,
+		ManageMatch,
+		AdGoal,
+		AdPlayer,
 	},
 	RoleAdmin: {
-		DeleteComment,
-		DeleteCommentary,
-		DeleteEvent,
-		DeleteProfile,
-		AdComment,
-		AdCommentary,
-		AdEvent,
-		AdFavoriteSport,
-		GetProfile,
-		EditProfile,
+	
 	},
 }
+
