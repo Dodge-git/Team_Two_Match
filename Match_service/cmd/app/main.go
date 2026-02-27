@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
 )
 
 func main() {
@@ -32,6 +33,11 @@ func main() {
 		log.Fatalf("не удалось выполнить миграции: %v", err)
 	}
 
+	rdb := redis.NewClient(&redis.Options{
+		Addr: "localhost:6379",
+	})
+	defer rdb.Close()
+
 	sportRepo := repository.NewSportRepository(db)
 	teamRepo := repository.NewTeamRepository(db)
 	playerRepo := repository.NewPlayerRepository(db)
@@ -43,7 +49,7 @@ func main() {
 
 	producer := kafka.NewProducer(brokers)
 
-	matchService := services.NewMatchService(matchRepo, sportRepo, teamRepo, producer)
+	matchService := services.NewMatchService(matchRepo, sportRepo, teamRepo, producer, rdb)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
