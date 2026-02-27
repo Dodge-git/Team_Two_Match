@@ -9,7 +9,7 @@ services:
     environment:
       - USER_SERVICE_URL=http://user:8000
       - MATCH_SERVICE_URL=http://match_service:8000
-      - EVENT_SERVICE_URL=http://event_service:8080
+      - EVENT_SERVICE_URL=http://event_service:8000
       - JWT_SECRET=hYsEyN01CaMrYsaidAhmad02BysicleNuRaDi03pRiorapoiuytrewwkcdkghdmv
     depends_on:
       - user
@@ -35,7 +35,7 @@ services:
       context: ./event_service
     container_name: event_service
     ports:
-      - "8082:8080"
+      - "8082:8000"
     environment:
       - DB_HOST=db_event
       - DB_PORT=5432

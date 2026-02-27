@@ -5,8 +5,6 @@ import (
 	"User/internal/repository"
 	"User/internal/services"
 	"User/internal/transport"
-	"log"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,24 +18,20 @@ func main() {
 
 	r := gin.Default()
 
-	api := r.Group("/api")
-	{
-		// AUTH
-		auth := api.Group("/auth")
-		{
-			auth.POST("/register", userHandler.Register)
-			auth.POST("/login", userHandler.Login)
-		}
+// AUTH
+auth := r.Group("/auth")
+{
+	auth.POST("/register", userHandler.Register)
+	auth.POST("/login", userHandler.Login)
+}
 
-		// USERS
-		users := api.Group("/users")
-		{
-			users.GET("/:id", userHandler.GetProfile)
-			users.PUT("/:id", userHandler.UpdateUser)
-			users.DELETE("/:id", userHandler.DeleteUser)
-		}
-	}
+// USERS
+users := r.Group("/users")
+{
+	users.GET("/:id", userHandler.GetProfile)
+	users.PUT("/:id", userHandler.UpdateUser)
+	users.DELETE("/:id", userHandler.DeleteUser)
+}
 
-	log.Println("User service running on :8000")
-	r.Run(":8000")
+r.Run(":8000")
 }

@@ -7,204 +7,42 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterRoutes(router *gin.Engine,cfg *config.Config)error{
+func RegisterRoutes(router *gin.Engine, cfg *config.Config) error {
 
-	userProxy , err := proxy.NewReverseProxy(cfg.UserServiceURL)
-	if err != nil{
-		return err
-	}
-	matchProxy, err := proxy.NewReverseProxy(cfg.MatchServiceURL)
-	if err != nil{
-		return err
-	}
-	eventProxy, err := proxy.NewReverseProxy(cfg.EventServiceURL)
-	if err != nil{
-		return err
-	}
+	userProxy, _ := proxy.NewReverseProxy(cfg.UserServiceURL)
+	matchProxy, _ := proxy.NewReverseProxy(cfg.MatchServiceURL)
+	eventProxy, _ := proxy.NewReverseProxy(cfg.EventServiceURL)
 
-	// ================= PUBLIC ROUTES =================
-
+	// ================= PUBLIC =================
 	router.Any("/api/auth/*path", gin.WrapH(userProxy))
 
-	// ================= PROTECTED ROUTES =================
-
+	// ================= PROTECTED =================
 	api := router.Group("/api")
 	api.Use(auth.AuthMiddleware(cfg.JWTSecret))
 
-	// ===================================================
-	// ================= USER SERVICE ====================
-	// ===================================================
+	// USER
+	api.Any("/users/*path", gin.WrapH(userProxy))
 
-	users := api.Group("/users")
-	{
-		users.GET("/:id", gin.WrapH(userProxy))
+	// MATCH SERVICE
+	api.Any("/matches/*path", gin.WrapH(matchProxy))
+	api.Any("/players/*path", gin.WrapH(matchProxy))
+	api.Any("/teams/*path", gin.WrapH(matchProxy))
+	api.Any("/sports/*path", gin.WrapH(matchProxy))
 
-		// Удаление профиля (сервис сам проверяет ownership)
-		users.DELETE("/:id",
-			auth.RBACMiddleware(auth.DeleteProfile),
-			gin.WrapH(userProxy),
-		)
-	}
+	// EVENT SERVICE
+	api.Any("/events", gin.WrapH(eventProxy))
+api.Any("/events/*path", gin.WrapH(eventProxy))
 
-	// ===================================================
-	// ================= MATCH SERVICE ===================
-	// ===================================================
+api.Any("/commentaries", gin.WrapH(eventProxy))
+api.Any("/commentaries/*path", gin.WrapH(eventProxy))
 
-	// ---------- MATCHES ----------
-	matches := api.Group("/matches")
-	{
-		// Чтение
-		matches.GET("/", gin.WrapH(matchProxy))
-		matches.GET("/:id", gin.WrapH(matchProxy))
-		matches.GET("/active", gin.WrapH(matchProxy))
+api.Any("/comments", gin.WrapH(eventProxy))
+api.Any("/comments/*path", gin.WrapH(eventProxy))
 
-		// Создание матча
-		matches.POST("/",
-			auth.RBACMiddleware(auth.CreateMatch),
-			gin.WrapH(matchProxy),
-		)
-
-		// Управление статусом
-		matches.PATCH("/start/:id",
-			auth.RBACMiddleware(auth.ManageMatch),
-			gin.WrapH(matchProxy),
-		)
-
-		matches.PATCH("/finish/:id",
-			auth.RBACMiddleware(auth.ManageMatch),
-			gin.WrapH(matchProxy),
-		)
-
-		matches.PATCH("/cancel/:id",
-			auth.RBACMiddleware(auth.ManageMatch),
-			gin.WrapH(matchProxy),
-		)
-
-		// Гол
-		matches.POST("/goal",
-			auth.RBACMiddleware(auth.AdGoal),
-			gin.WrapH(matchProxy),
-		)
-
-		// Удаление (только admin)
-		matches.DELETE("/:id",
-			auth.RBACMiddleware(auth.DeleteMatch),
-			gin.WrapH(matchProxy),
-		)
-	}
-
-	// ---------- PLAYERS ----------
-	players := api.Group("/players")
-	{
-		players.GET("/:id", gin.WrapH(matchProxy))
-		players.GET("/team/:team_id", gin.WrapH(matchProxy))
-
-		players.POST("/",
-			auth.RBACMiddleware(auth.AdPlayer),
-			gin.WrapH(matchProxy),
-		)
-
-		players.PATCH("/:id",
-			auth.RBACMiddleware(auth.AdPlayer),
-			gin.WrapH(matchProxy),
-		)
-
-		players.DELETE("/:id",
-			auth.RBACMiddleware(auth.AdPlayer),
-			gin.WrapH(matchProxy),
-		)
-	}
-
-	// ---------- TEAMS ----------
-	teams := api.Group("/teams")
-	{
-		teams.GET("/", gin.WrapH(matchProxy))
-		teams.GET("/:id", gin.WrapH(matchProxy))
-
-		teams.POST("/",
-			auth.RBACMiddleware(auth.AdTeam),
-			gin.WrapH(matchProxy),
-		)
-
-		teams.DELETE("/:id",
-			auth.RBACMiddleware(auth.AdTeam),
-			gin.WrapH(matchProxy),
-		)
-	}
-
-	// ---------- SPORTS ----------
-	sports := api.Group("/sports")
-	{
-		sports.GET("/", gin.WrapH(matchProxy))
-
-		sports.POST("/",
-			auth.RBACMiddleware(auth.AdSport),
-			gin.WrapH(matchProxy),
-		)
-	}
-
-	// ===================================================
-	// ================= EVENT SERVICE ===================
-	// ===================================================
-
-	events := api.Group("/events")
-	{
-		events.GET("/*path", gin.WrapH(eventProxy))
-
-		events.POST("",
-			auth.RBACMiddleware(auth.AdEvent),
-			gin.WrapH(eventProxy),
-		)
-
-		events.DELETE("/:id",
-			auth.RBACMiddleware(auth.DeleteEvent),
-			gin.WrapH(eventProxy),
-		)
-	}
-
-	commentaries := api.Group("/commentaries")
-	{
-		commentaries.GET("/*path", gin.WrapH(eventProxy))
-
-		commentaries.POST("",
-			auth.RBACMiddleware(auth.AdCommentary),
-			gin.WrapH(eventProxy),
-		)
-
-		commentaries.DELETE("/:id",
-			auth.RBACMiddleware(auth.DeleteCommentary),
-			gin.WrapH(eventProxy),
-		)
-	}
-
-	comments := api.Group("/comments")
-	{
-		comments.POST("",
-			auth.RBACMiddleware(auth.AdComment),
-			gin.WrapH(eventProxy),
-		)
-
-		comments.PATCH("/:id",
-			auth.RBACMiddleware(auth.AdComment),
-			gin.WrapH(eventProxy),
-		)
-
-		comments.DELETE("/:id",
-			auth.RBACMiddleware(auth.DeleteComment),
-			gin.WrapH(eventProxy),
-		)
-	}
-
-	reactions := api.Group("/reactions")
-	{
-		reactions.POST("",
-			gin.WrapH(eventProxy),
-		)
-	}
+api.Any("/reactions", gin.WrapH(eventProxy))
+api.Any("/reactions/*path", gin.WrapH(eventProxy))
 
 	return nil
 }
-
-
 
 	 
