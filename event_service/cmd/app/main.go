@@ -1,11 +1,16 @@
 package main
 
 import (
+	"context"
+	"fmt"
+	"log"
 	"log/slog"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
 
 	"github.com/mountainman199231/event_service/internal/client/match"
 	"github.com/mountainman199231/event_service/internal/config"
@@ -16,6 +21,29 @@ import (
 
 func main() {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+
+	redisAddr := os.Getenv("REDIS_ADDR")
+	if redisAddr == "" {
+		logger.Error("REDIS_ADDR is not set")
+		os.Exit(1)
+	}
+
+	rdb := redis.NewClient(&redis.Options{
+		Addr:         redisAddr,
+		PoolSize:     20,
+		MinIdleConns: 5,
+	})
+	defer rdb.Close()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	pong, err := rdb.Ping(ctx).Result()
+	if err != nil {
+		log.Fatal("Не удалось подключиться к redis:", err)
+	}
+
+	logger.Info("Redis подключен:", pong)
 
 	// config.SetEnv(logger)
 
@@ -55,7 +83,7 @@ func main() {
 		commentaryRepo,
 	)
 
-	commentService := service.NewCommentService(commentRepo)
+	commentService := service.NewCommentService(commentRepo, rdb)
 
 	commentaryService := service.NewCommentaryService(
 		commentaryRepo,
