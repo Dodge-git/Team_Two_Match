@@ -71,9 +71,11 @@ services:
       - DB_PASS=postgres
       - DB_NAME=match_service
       - KAFKA_BROKER=kafka:9093
+      - REDIS_ADDR=redis:6379
     depends_on:
       - db_match
       - kafka
+      - redis
 
   db_user:
     image: postgres:17
