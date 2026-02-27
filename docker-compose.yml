@@ -44,10 +44,19 @@ services:
       - DB_NAME=event_service
       - MATCH_SERVICE_URL=http://match_service:8000
       - KAFKA_BROKER=kafka:9093
+      - REDIS_ADDR=redis:6379
     depends_on:
       - db_event
       - match_service
       - kafka
+      - redis
+
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
 
   match_service:
     build:
