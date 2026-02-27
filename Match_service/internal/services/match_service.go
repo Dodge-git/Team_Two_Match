@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"match_service/internal/dto"
 	"match_service/internal/errs"
@@ -9,6 +10,8 @@ import (
 	"match_service/internal/ports"
 	"match_service/internal/repository"
 	"time"
+
+	"github.com/redis/go-redis/v9"
 )
 
 type MatchService interface {
@@ -28,11 +31,11 @@ type matchService struct {
 	sportRepo repository.SportRepository
 	teamRepo  repository.TeamRepository
 	producer  ports.Producer
-	//kafkaConsumer kafka.Consumer
+	rdb       *redis.Client
 }
 
-func NewMatchService(matchRepo repository.MatchRepository, sportRepo repository.SportRepository, teamRepo repository.TeamRepository, producer ports.Producer) MatchService {
-	return &matchService{matchRepo: matchRepo, sportRepo: sportRepo, teamRepo: teamRepo, producer: producer}
+func NewMatchService(matchRepo repository.MatchRepository, sportRepo repository.SportRepository, teamRepo repository.TeamRepository, producer ports.Producer, rdb *redis.Client) MatchService {
+	return &matchService{matchRepo: matchRepo, sportRepo: sportRepo, teamRepo: teamRepo, producer: producer, rdb: rdb}
 }
 
 func (s *matchService) CreateMatch(req dto.CreateMatchRequest) (*models.Match, error) {
@@ -279,6 +282,29 @@ func (s *matchService) UpdateScoreFromKafka(ctx context.Context, goalEvent model
 }
 
 func (s *matchService) GetActive() ([]models.Match, error) {
+	ctx := context.Background()
 
-	return s.matchRepo.GetActive()
+	cached, err := s.rdb.Get(ctx, "active_matches").Result()
+	if err == nil {
+		var matches []models.Match
+		if err := json.Unmarshal([]byte(cached), &matches); err != nil {
+			return nil, err
+		}
+		return matches, nil
+	}
+
+	matches, err := s.matchRepo.GetActive()
+	if err != nil {
+		return nil, err
+	}
+
+	data, err := json.Marshal(matches)
+	if err != nil {
+		return nil, err
+	}
+
+	s.rdb.Set(ctx, "active_matches", data, 5*time.Minute)
+
+	return matches, nil
+
 }

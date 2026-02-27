@@ -26,7 +26,7 @@ type Match struct {
 	AwayTeamID uint  `json:"away_team_id" gorm:"not null"`
 	AwayTeam   *Team `json:"-" gorm:"foreignKey:AwayTeamID"`
 
-	Status MatchStatus `json:"status" gorm:"type:varchar(16);not null;default:'scheduled'; check:status IN ('scheduled','live','finished','cancelled')"`
+	Status MatchStatus `json:"status" gorm:"index;type:varchar(16);not null;default:'scheduled'; check:status IN ('scheduled','live','finished','cancelled')"`
 
 	ScheduledAt time.Time  `json:"scheduled_at" gorm:"not null"`
 	StartedAt   *time.Time `json:"started_at"`
@@ -48,10 +48,6 @@ type MatchFilter struct {
 	PageSize int          `json:"page_size"`
 }
 
-// type GoalEvent struct {
-// 	MatchID uint `json:"match_id"`
-// 	TeamID  uint `json:"team_id"`
-// }
 
 type GoalEvent struct {
 	MatchID  uint `json:"match_id"`

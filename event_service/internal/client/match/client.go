@@ -59,5 +59,6 @@ func (c *httpClient) GetMatch(ctx context.Context, matchID uint64) (*MatchRespon
 	}
 
 	// match := MatchResponse{ID: 1, Status: "live"}
-	return &match, nil
+	 return &match, nil
+
 }
